@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Visuals & Stats - Consistent Input Sizes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Style input number spinners (optional) */
+        input[type="number"] {
+            appearance: textfield;
+            -moz-appearance: textfield;
+        }
+        /* Ensure canvas itself has no extra margin/padding */
+         canvas {
+             display: block;
+             width: 100%;
+             height: 100%;
+             background-color: #ffffff; /* White background for the drawing area */
+             border-radius: 0.5rem; /* rounded-lg */
+         }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen p-4 md:p-8 flex flex-col items-center">
+
+    <div class="w-full max-w-5xl space-y-8">
+
+        <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-200 relative"> <h2 class="text-xl font-semibold text-center text-gray-700 mb-4">Path Visualization</h2>
+            <div class="w-full aspect-square max-w-xl mx-auto bg-gray-50 rounded-lg overflow-hidden shadow-inner relative"> <canvas id="pathCanvas" width="600" height="600"></canvas>
+
+                 <div id="sequenceInfoCard" class="absolute bottom-3 left-3 bg-gray-900/60 backdrop-blur-sm text-white text-xs font-medium p-2 rounded-md shadow-md">
+                     Loading...
+                 </div>
+                 <div id="pathInfoCard" class="absolute bottom-3 right-3 bg-gray-900/60 backdrop-blur-sm text-white text-xs font-medium p-2 rounded-md shadow-md">
+                     Loading...
+                 </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 items-end">
+
+                <div class="p-3 border border-gray-200 rounded-lg bg-gray-50/50 md:col-span-1">
+                     <p class="text-sm font-medium text-center text-gray-600 mb-2">Starting Pair</p>
+                     <div class="grid grid-cols-2 gap-x-3">
+                         <div>
+                            <label for="x1Input" class="block text-xs font-medium text-gray-600 mb-1">First Number</label>
+                            <input type="number" id="x1Input" value="1" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out text-sm">
+                         </div>
+                         <div>
+                            <label for="x2Input" class="block text-xs font-medium text-gray-600 mb-1">Second Number</label>
+                            <input type="number" id="x2Input" value="1" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out text-sm">
+                         </div>
+                     </div>
+                </div>
+
+                <div class="md:col-span-1">
+                    <label for="modInput" class="block text-sm font-medium text-gray-600 mb-1">Modulus (m)</label>
+                    <input type="number" id="modInput" value="10" min="1" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out text-sm">
+                </div>
+
+                <div class="md:col-span-1">
+                    <label for="sidesInput" class="block text-sm font-medium text-gray-600 mb-1">Directions</label>
+                    <input type="number" id="sidesInput" value="4" min="1" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out text-sm">
+                </div>
+
+            </div>
+             <div class="mt-4 text-center">
+                 <p id="error-message" class="text-sm text-red-600 h-5"></p>
+             </div>
+        </div>
+
+    </div> <script>
+        // --- Get DOM Elements ---
+        const modInput = document.getElementById('modInput');
+        const x1Input = document.getElementById('x1Input'); // Now "First Number"
+        const x2Input = document.getElementById('x2Input'); // Now "Second Number"
+        const sidesInput = document.getElementById('sidesInput');
+        const canvas = document.getElementById('pathCanvas');
+        const ctx = canvas.getContext('2d');
+        const errorMessage = document.getElementById('error-message');
+        const sequenceInfoCard = document.getElementById('sequenceInfoCard');
+        const pathInfoCard = document.getElementById('pathInfoCard');
+
+
+        // --- Configuration ---
+        const SEQUENCE_LENGTH = 5000; // Fixed sequence length
+        const ORIGIN_THRESHOLD = 1e-6; // Threshold for checking path return to origin
+
+        // --- Core Logic ---
+
+        /**
+         * Generates sequence X_n = (X_{n-1} + X_{n-2}) % mod for a fixed length.
+         */
+        function generateSequence(x1, x2, mod) { // Removed length parameter
+            const length = SEQUENCE_LENGTH; // Use fixed length
+            if (mod <= 0) { errorMessage.textContent = "Modulus must be positive."; return []; }
+            // No need to check length < 2 as it's fixed at 5000
+            // No need to cap length as it's fixed
+
+            const seq = [x1, x2];
+            // Handle case where fixed length is less than 2 (though it's 5000 here)
+            if (length < 2) return seq.slice(0, length);
+
+            for (let i = 2; i < length; i++) {
+                // Use BigInt for intermediate sum to prevent potential overflow before modulo
+                const nextVal = (BigInt(seq[i - 1]) + BigInt(seq[i - 2])) % BigInt(mod);
+                seq.push(Number(nextVal)); // Convert back to Number for the sequence array
+            }
+            return seq;
+        }
+
+        /**
+         * Calculates XY coordinates based on sequence, movement directions (sides), and mod value.
+         */
+        function calculatePathCoords(sequence, mod, sides) {
+            let x = 0, y = 0;
+            const xCoords = [x], yCoords = [y];
+            if (sides < 1) sides = 1; // Ensure sides is at least 1
+            const angleIncrementRad = (2 * Math.PI) / sides;
+            sequence.forEach((value, i) => {
+                const distance = (value === 0) ? mod : value; // Use mod value if sequence value is 0
+                const currentAngleRad = i * angleIncrementRad; // Calculate angle for this step
+                const dx = Math.cos(currentAngleRad);
+                const dy = Math.sin(currentAngleRad);
+                x += dx * distance;
+                y += dy * distance;
+                xCoords.push(x);
+                yCoords.push(y);
+            });
+            return { xCoords, yCoords };
+        }
+
+        /**
+         * Calculates statistics about the sequence periodicity.
+         * Finds the first repeating pair (Xk-1, Xk) == (Xn-1, Xn) and sums the values
+         * from index k_end to n_end-1 (which corresponds to the first full cycle).
+         */
+        function calculateSequenceStats(sequence) {
+            if (sequence.length < 2) { return { periodSum: null, periodLength: null }; }
+            const seenPairs = new Map(); // Stores "value1,value2" -> index where pair *ends*
+             // Store the initial pair if sequence is long enough
+             if (sequence.length >= 2) {
+                 seenPairs.set(`${sequence[0]},${sequence[1]}`, 1);
+             }
+            // Iterate starting from the 3rd element to check pairs (seq[i-1], seq[i])
+            for (let i = 2; i < sequence.length; i++) {
+                const currentPairStr = `${sequence[i-1]},${sequence[i]}`;
+                if (seenPairs.has(currentPairStr)) {
+                    const k_end = seenPairs.get(currentPairStr); // Index where the *first* cycle ended
+                    const n_end = i; // Index where the *repeat* was found (end of second cycle instance)
+                    const periodLength = n_end - k_end; // Length of the cycle
+                    let periodSum = 0;
+                    // Sum values within the first occurrence of the cycle (indices k_end to n_end - 1)
+                    if (k_end >= 0 && n_end > k_end && n_end <= sequence.length) {
+                         for (let j = k_end; j < n_end; j++) {
+                             // Add safety check for index bounds
+                             if (j >= 0 && j < sequence.length) {
+                                 periodSum += sequence[j];
+                             }
+                         }
+                    }
+                    return { periodSum: periodSum, periodLength: periodLength };
+                } else {
+                    seenPairs.set(currentPairStr, i); // Store the index where this pair ends
+                }
+            }
+            // No repeat found within the sequence length
+            return { periodSum: null, periodLength: null };
+        }
+
+
+        /**
+         * Calculates statistics about the path.
+         * Finds the first time the path returns close to the origin (0,0).
+         */
+        function calculatePathStats(xCoords, yCoords) {
+            // Start checking from the first step (index 1)
+            for (let i = 1; i < xCoords.length; i++) {
+                // Calculate distance from origin for point i
+                const distanceToOrigin = Math.sqrt(xCoords[i]**2 + yCoords[i]**2);
+                // Check if the distance is within the defined threshold
+                if (distanceToOrigin < ORIGIN_THRESHOLD) {
+                    return { returnSteps: i }; // Return the number of steps taken to reach origin
+                }
+            }
+            // No return to origin found within the path length
+            return { returnSteps: null };
+        }
+
+
+        /**
+         * Draws the calculated path on the canvas with gradient lines and shaded area.
+         */
+        function drawPath(context, xCoords, yCoords) {
+            const width = context.canvas.width; const height = context.canvas.height; context.clearRect(0, 0, width, height); if (xCoords.length < 2) return; let minX = xCoords[0], maxX = xCoords[0], minY = yCoords[0], maxY = yCoords[0]; for (let i = 1; i < xCoords.length; i++) { minX = Math.min(minX, xCoords[i]); maxX = Math.max(maxX, xCoords[i]); minY = Math.min(minY, yCoords[i]); maxY = Math.max(maxY, yCoords[i]); } const pathWidth = maxX - minX; const pathHeight = maxY - minY; if (pathWidth === 0 && pathHeight === 0 && xCoords.length >= 1) { return; } const padding = 40; const effectiveCanvasWidth = width - 2 * padding; const effectiveCanvasHeight = height - 2 * padding; const scaleX = pathWidth === 0 ? 1 : effectiveCanvasWidth / pathWidth; const scaleY = pathHeight === 0 ? 1 : effectiveCanvasHeight / pathHeight; const scale = Math.min(scaleX, scaleY) * 0.95; const centerX = (minX + maxX) / 2; const centerY = (minY + maxY) / 2; const translateX = width / 2 - centerX * scale; const translateY = height / 2 - centerY * scale; const transformedX = xCoords.map(x => translateX + x * scale); const transformedY = yCoords.map(y => translateY + y * scale);
+
+            // --- 1. Draw Shaded Area (Fill) ---
+            context.beginPath(); context.moveTo(transformedX[0], transformedY[0]); for (let i = 1; i < transformedX.length; i++) { context.lineTo(transformedX[i], transformedY[i]); } context.fillStyle = 'rgba(230, 230, 250, 0.15)'; context.fill();
+
+            // --- 2. Draw Gradient Line Segments ---
+            context.lineWidth = 1.5; context.lineCap = 'round'; context.lineJoin = 'round';
+            for (let i = 0; i < transformedX.length - 1; i++) { const x1 = transformedX[i]; const y1 = transformedY[i]; const x2 = transformedX[i+1]; const y2 = transformedY[i+1]; const deltaX = x2 - x1; const deltaY = y2 - y1; const segmentAngleRad = Math.atan2(deltaY, deltaX); const hue = (segmentAngleRad * 180 / Math.PI + 180) % 360; context.strokeStyle = `hsl(${hue}, 90%, 50%)`; context.beginPath(); context.moveTo(x1, y1); context.lineTo(x2, y2); context.stroke(); }
+
+            // --- 3. Draw Points --- (Removed)
+        }
+
+        /**
+         * Main function to update the visualization and stats based on input values.
+         */
+        function updateVisualization() {
+            errorMessage.textContent = ''; // Clear previous errors
+            // Get input values
+            const mod = parseInt(modInput.value, 10);
+            const x1 = parseInt(x1Input.value, 10);
+            const x2 = parseInt(x2Input.value, 10);
+            const sides = parseInt(sidesInput.value, 10);
+            const len = SEQUENCE_LENGTH; // Use fixed length
+
+            // Validate inputs
+            if (isNaN(mod) || isNaN(x1) || isNaN(x2) || isNaN(sides)) { errorMessage.textContent = "Invalid integer values."; ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
+            if (mod <= 0) { errorMessage.textContent = "Modulus must be > 0."; ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
+            if (sides < 1) { errorMessage.textContent = "Directions must be >= 1."; ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
+
+            // --- Calculations ---
+            const sequence = generateSequence(x1, x2, mod); // Generate sequence
+            if (!sequence.length && mod > 0) return; // Exit if sequence failed but mod was valid
+
+            const { xCoords, yCoords } = calculatePathCoords(sequence, mod, sides); // Calculate path
+
+            // --- Calculate Stats ---
+            const seqStats = calculateSequenceStats(sequence); // Calculate sequence stats
+            const pathStats = calculatePathStats(xCoords, yCoords); // Calculate path stats
+
+            // --- Update Info Cards ---
+            // Display sequence cycle info
+            if (seqStats.periodSum !== null) {
+                sequenceInfoCard.textContent = `Cycle Sum: ${seqStats.periodSum} (len: ${seqStats.periodLength})`;
+            } else {
+                sequenceInfoCard.textContent = `Cycle Sum: N/A (in ${len} steps)`;
+            }
+            // Display path return info
+            if (pathStats.returnSteps !== null) {
+                pathInfoCard.textContent = `Origin Return: ${pathStats.returnSteps} steps`;
+            } else {
+                pathInfoCard.textContent = `Origin Return: N/A`;
+            }
+
+            // --- Draw Path ---
+            drawPath(ctx, xCoords, yCoords); // Draw the visualization
+        }
+
+        // --- Event Listeners ---
+        // Update visualization when any input changes
+        modInput.addEventListener('input', updateVisualization);
+        x1Input.addEventListener('input', updateVisualization);
+        x2Input.addEventListener('input', updateVisualization);
+        sidesInput.addEventListener('input', updateVisualization);
+
+        // --- Canvas Resizing and Initial Draw ---
+        // Function to handle canvas resizing and trigger redraw
+        function setCanvasSizeAndDraw() {
+            const container = canvas.parentElement; // Get parent container
+            const resolution = 600; // Set internal canvas resolution
+            canvas.width = resolution; canvas.height = resolution;
+            // CSS handles the actual display size based on parent
+            updateVisualization(); // Redraw everything
+        }
+        // Use ResizeObserver to detect parent size changes
+        const resizeObserver = new ResizeObserver(entries => {
+            setCanvasSizeAndDraw(); // Redraw on resize
+        });
+        // Observe the canvas's parent element if it exists
+        if (canvas.parentElement) {
+            resizeObserver.observe(canvas.parentElement);
+        }
+        // Perform initial setup and draw when the page loads
+        window.addEventListener('load', setCanvasSizeAndDraw);
+
+    </script>
+
+</body>
+</html>
