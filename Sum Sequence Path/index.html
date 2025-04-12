@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Visuals & Stats - Consistent Input Sizes</title>
+    <title>Sum Sequence Path - Trevorything.ai</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         /* Custom font */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
-
         body {
             font-family: 'Inter', sans-serif;
+            /* Removed gradient, added dark background matching landing */
+            background-color: #111827; /* bg-gray-900 */
+            color: #f3f4f6; /* text-gray-100 */
         }
         /* Style input number spinners (optional) */
         input[type="number"] {
@@ -22,61 +26,88 @@
              display: block;
              width: 100%;
              height: 100%;
-             background-color: #ffffff; /* White background for the drawing area */
+             /* Changed canvas background to dark gray */
+             background-color: #374151; /* bg-gray-700 */
              border-radius: 0.5rem; /* rounded-lg */
+         }
+         /* Added style for gradient text for the header */
+         .gradient-text {
+            background-image: linear-gradient(to right, #a78bfa, #ec4899, #ef4444); /* from-purple-400 via-pink-500 to-red-500 */
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
          }
     </style>
 </head>
-<body class="bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen p-4 md:p-8 flex flex-col items-center">
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
 
-    <div class="w-full max-w-5xl space-y-8">
+    <header class="py-4 px-4 md:px-8 bg-gray-800 shadow-md rounded-b-lg mb-8 w-full">
+        <div class="container mx-auto flex justify-center md:justify-start">
+             <a href="../index.html" class="text-decoration-none">
+                <h1 class="text-4xl md:text-5xl font-bold gradient-text pb-1">
+                    Trevorything.ai
+                </h1>
+            </a>
+            </div>
+    </header>
 
-        <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-200 relative"> <h2 class="text-xl font-semibold text-center text-gray-700 mb-4">Path Visualization</h2>
-            <div class="w-full aspect-square max-w-xl mx-auto bg-gray-50 rounded-lg overflow-hidden shadow-inner relative"> <canvas id="pathCanvas" width="600" height="600"></canvas>
+    <main class="container mx-auto px-4 py-8 flex-grow">
+        <div class="w-full max-w-5xl mx-auto space-y-8">
 
-                 <div id="sequenceInfoCard" class="absolute bottom-3 left-3 bg-gray-900/60 backdrop-blur-sm text-white text-xs font-medium p-2 rounded-md shadow-md">
-                     Loading...
-                 </div>
-                 <div id="pathInfoCard" class="absolute bottom-3 right-3 bg-gray-900/60 backdrop-blur-sm text-white text-xs font-medium p-2 rounded-md shadow-md">
-                     Loading...
+            <div class="bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg border border-gray-700 relative">
+                <h2 class="text-xl font-semibold text-center text-gray-200 mb-4">Path Visualization</h2>
+                <div class="w-full aspect-square max-w-xl mx-auto bg-gray-700 rounded-lg overflow-hidden shadow-inner relative">
+                    <canvas id="pathCanvas" width="600" height="600"></canvas>
+                    <div id="sequenceInfoCard" class="absolute bottom-3 left-3 bg-gray-900/60 backdrop-blur-sm text-white text-xs font-medium p-2 rounded-md shadow-md">
+                        Loading...
+                    </div>
+                    <div id="pathInfoCard" class="absolute bottom-3 right-3 bg-gray-900/60 backdrop-blur-sm text-white text-xs font-medium p-2 rounded-md shadow-md">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 items-end">
+
+                    <div class="p-3 border border-gray-600 rounded-lg bg-gray-700/50 md:col-span-1">
+                        <p class="text-sm font-medium text-center text-gray-400 mb-2">Starting Pair</p>
+                        <div class="grid grid-cols-2 gap-x-3">
+                            <div>
+                                <label for="x1Input" class="block text-xs font-medium text-gray-400 mb-1">First Number</label>
+                                <input type="number" id="x1Input" value="1" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out text-sm">
+                            </div>
+                            <div>
+                                <label for="x2Input" class="block text-xs font-medium text-gray-400 mb-1">Second Number</label>
+                                <input type="number" id="x2Input" value="1" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out text-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-1">
+                        <label for="modInput" class="block text-sm font-medium text-gray-400 mb-1">Modulus (m)</label>
+                        <input type="number" id="modInput" value="10" min="1" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out text-sm">
+                    </div>
+
+                    <div class="md:col-span-1">
+                        <label for="sidesInput" class="block text-sm font-medium text-gray-400 mb-1">Directions</label>
+                        <input type="number" id="sidesInput" value="4" min="1" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out text-sm">
+                    </div>
+
+                </div>
+                 <div class="mt-4 text-center">
+                      <p id="error-message" class="text-sm text-red-400 h-5"></p>
                  </div>
             </div>
+
         </div>
+    </main>
 
-        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 items-end">
+    <footer class="mt-12 py-6 px-4 text-center text-gray-400 border-t border-gray-700 w-full">
+         <p>&copy; <span id="currentYear"></span> Trevorything.ai. All rights reserved.</p>
+    </footer>
 
-                <div class="p-3 border border-gray-200 rounded-lg bg-gray-50/50 md:col-span-1">
-                     <p class="text-sm font-medium text-center text-gray-600 mb-2">Starting Pair</p>
-                     <div class="grid grid-cols-2 gap-x-3">
-                         <div>
-                            <label for="x1Input" class="block text-xs font-medium text-gray-600 mb-1">First Number</label>
-                            <input type="number" id="x1Input" value="1" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out text-sm">
-                         </div>
-                         <div>
-                            <label for="x2Input" class="block text-xs font-medium text-gray-600 mb-1">Second Number</label>
-                            <input type="number" id="x2Input" value="1" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out text-sm">
-                         </div>
-                     </div>
-                </div>
-
-                <div class="md:col-span-1">
-                    <label for="modInput" class="block text-sm font-medium text-gray-600 mb-1">Modulus (m)</label>
-                    <input type="number" id="modInput" value="10" min="1" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out text-sm">
-                </div>
-
-                <div class="md:col-span-1">
-                    <label for="sidesInput" class="block text-sm font-medium text-gray-600 mb-1">Directions</label>
-                    <input type="number" id="sidesInput" value="4" min="1" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out text-sm">
-                </div>
-
-            </div>
-             <div class="mt-4 text-center">
-                 <p id="error-message" class="text-sm text-red-600 h-5"></p>
-             </div>
-        </div>
-
-    </div> <script>
+    <script>
         // --- Get DOM Elements ---
         const modInput = document.getElementById('modInput');
         const x1Input = document.getElementById('x1Input'); // Now "First Number"
@@ -199,16 +230,32 @@
          * Draws the calculated path on the canvas with gradient lines and shaded area.
          */
         function drawPath(context, xCoords, yCoords) {
-            const width = context.canvas.width; const height = context.canvas.height; context.clearRect(0, 0, width, height); if (xCoords.length < 2) return; let minX = xCoords[0], maxX = xCoords[0], minY = yCoords[0], maxY = yCoords[0]; for (let i = 1; i < xCoords.length; i++) { minX = Math.min(minX, xCoords[i]); maxX = Math.max(maxX, xCoords[i]); minY = Math.min(minY, yCoords[i]); maxY = Math.max(maxY, yCoords[i]); } const pathWidth = maxX - minX; const pathHeight = maxY - minY; if (pathWidth === 0 && pathHeight === 0 && xCoords.length >= 1) { return; } const padding = 40; const effectiveCanvasWidth = width - 2 * padding; const effectiveCanvasHeight = height - 2 * padding; const scaleX = pathWidth === 0 ? 1 : effectiveCanvasWidth / pathWidth; const scaleY = pathHeight === 0 ? 1 : effectiveCanvasHeight / pathHeight; const scale = Math.min(scaleX, scaleY) * 0.95; const centerX = (minX + maxX) / 2; const centerY = (minY + maxY) / 2; const translateX = width / 2 - centerX * scale; const translateY = height / 2 - centerY * scale; const transformedX = xCoords.map(x => translateX + x * scale); const transformedY = yCoords.map(y => translateY + y * scale);
+            const width = context.canvas.width; const height = context.canvas.height;
+            // Use the dark background color set in CSS instead of clearing to white/transparent
+            context.fillStyle = getComputedStyle(context.canvas).backgroundColor || '#374151'; // Fallback
+            context.fillRect(0, 0, width, height);
+
+            if (xCoords.length < 2) return;
+            let minX = xCoords[0], maxX = xCoords[0], minY = yCoords[0], maxY = yCoords[0];
+            for (let i = 1; i < xCoords.length; i++) { minX = Math.min(minX, xCoords[i]); maxX = Math.max(maxX, xCoords[i]); minY = Math.min(minY, yCoords[i]); maxY = Math.max(maxY, yCoords[i]); }
+            const pathWidth = maxX - minX; const pathHeight = maxY - minY; if (pathWidth === 0 && pathHeight === 0 && xCoords.length >= 1) { return; } const padding = 40; const effectiveCanvasWidth = width - 2 * padding; const effectiveCanvasHeight = height - 2 * padding; const scaleX = pathWidth === 0 ? 1 : effectiveCanvasWidth / pathWidth; const scaleY = pathHeight === 0 ? 1 : effectiveCanvasHeight / pathHeight; const scale = Math.min(scaleX, scaleY) * 0.95; const centerX = (minX + maxX) / 2; const centerY = (minY + maxY) / 2; const translateX = width / 2 - centerX * scale; const translateY = height / 2 - centerY * scale; const transformedX = xCoords.map(x => translateX + x * scale); const transformedY = yCoords.map(y => translateY + y * scale);
 
             // --- 1. Draw Shaded Area (Fill) ---
-            context.beginPath(); context.moveTo(transformedX[0], transformedY[0]); for (let i = 1; i < transformedX.length; i++) { context.lineTo(transformedX[i], transformedY[i]); } context.fillStyle = 'rgba(230, 230, 250, 0.15)'; context.fill();
+            context.beginPath(); context.moveTo(transformedX[0], transformedY[0]);
+            for (let i = 1; i < transformedX.length; i++) { context.lineTo(transformedX[i], transformedY[i]); }
+            // Adjusted fill color for better visibility on dark background
+            context.fillStyle = 'rgba(209, 213, 219, 0.1)'; // gray-300 with low opacity
+            context.fill();
 
             // --- 2. Draw Gradient Line Segments ---
             context.lineWidth = 1.5; context.lineCap = 'round'; context.lineJoin = 'round';
-            for (let i = 0; i < transformedX.length - 1; i++) { const x1 = transformedX[i]; const y1 = transformedY[i]; const x2 = transformedX[i+1]; const y2 = transformedY[i+1]; const deltaX = x2 - x1; const deltaY = y2 - y1; const segmentAngleRad = Math.atan2(deltaY, deltaX); const hue = (segmentAngleRad * 180 / Math.PI + 180) % 360; context.strokeStyle = `hsl(${hue}, 90%, 50%)`; context.beginPath(); context.moveTo(x1, y1); context.lineTo(x2, y2); context.stroke(); }
-
-            // --- 3. Draw Points --- (Removed)
+            for (let i = 0; i < transformedX.length - 1; i++) {
+                 const x1 = transformedX[i]; const y1 = transformedY[i]; const x2 = transformedX[i+1]; const y2 = transformedY[i+1]; const deltaX = x2 - x1; const deltaY = y2 - y1; const segmentAngleRad = Math.atan2(deltaY, deltaX);
+                 // Use brighter HSL colors for dark background
+                 const hue = (segmentAngleRad * 180 / Math.PI + 180) % 360;
+                 context.strokeStyle = `hsl(${hue}, 100%, 65%)`; // Increased lightness
+                 context.beginPath(); context.moveTo(x1, y1); context.lineTo(x2, y2); context.stroke();
+             }
         }
 
         /**
@@ -224,9 +271,25 @@
             const len = SEQUENCE_LENGTH; // Use fixed length
 
             // Validate inputs
-            if (isNaN(mod) || isNaN(x1) || isNaN(x2) || isNaN(sides)) { errorMessage.textContent = "Invalid integer values."; ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
-            if (mod <= 0) { errorMessage.textContent = "Modulus must be > 0."; ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
-            if (sides < 1) { errorMessage.textContent = "Directions must be >= 1."; ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
+            if (isNaN(mod) || isNaN(x1) || isNaN(x2) || isNaN(sides)) {
+                 errorMessage.textContent = "Invalid integer values.";
+                 // Clear canvas on error
+                 ctx.fillStyle = getComputedStyle(ctx.canvas).backgroundColor || '#374151';
+                 ctx.fillRect(0, 0, canvas.width, canvas.height);
+                 return;
+            }
+            if (mod <= 0) {
+                errorMessage.textContent = "Modulus must be > 0.";
+                ctx.fillStyle = getComputedStyle(ctx.canvas).backgroundColor || '#374151';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+            if (sides < 1) {
+                errorMessage.textContent = "Directions must be >= 1.";
+                ctx.fillStyle = getComputedStyle(ctx.canvas).backgroundColor || '#374151';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
 
             // --- Calculations ---
             const sequence = generateSequence(x1, x2, mod); // Generate sequence
@@ -241,7 +304,7 @@
             // --- Update Info Cards ---
             // Display sequence cycle info
             if (seqStats.periodSum !== null) {
-                sequenceInfoCard.textContent = `Cycle Sum: ${seqStats.periodSum} (len: ${seqStats.periodLength})`;
+                sequenceInfoCard.innerHTML = `Cycle Sum: ${seqStats.periodSum} <br> (len: ${seqStats.periodLength})`; // Use innerHTML for line break
             } else {
                 sequenceInfoCard.textContent = `Cycle Sum: N/A (in ${len} steps)`;
             }
@@ -280,8 +343,20 @@
         if (canvas.parentElement) {
             resizeObserver.observe(canvas.parentElement);
         }
+
+        // --- Footer Year Update ---
+        function updateFooterYear() {
+             const currentYearElement = document.getElementById('currentYear');
+             if (currentYearElement) {
+                 currentYearElement.textContent = new Date().getFullYear();
+             }
+        }
+
         // Perform initial setup and draw when the page loads
-        window.addEventListener('load', setCanvasSizeAndDraw);
+        window.addEventListener('load', () => {
+            setCanvasSizeAndDraw();
+            updateFooterYear(); // Also set footer year on load
+        });
 
     </script>
 
