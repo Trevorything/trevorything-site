@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sum Sequence Modular Matrix</title>
+    <title>Sum Sequence Matrix - Trevorything.ai</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,9 +12,9 @@
         /* Basic styles */
         body {
             font-family: 'Inter', sans-serif;
+            /* Ensured dark background and light text */
             background-color: #111827; /* bg-gray-900 */
-            color: #f9fafb; /* text-gray-50 */
-            @apply min-h-screen;
+            color: #f3f4f6; /* text-gray-100 */
         }
 
         /* Grid cell styling */
@@ -25,12 +25,14 @@
         }
 
         .grid-cell:hover {
+             /* Kept teal accent for hover consistency within this page */
             @apply ring-2 ring-offset-2 ring-teal-400 ring-offset-gray-900 z-10;
             transform: scale(1.1);
         }
         /* Style for highlighted sequence cells */
         .highlight-sequence {
-             box-shadow: inset 0 0 0 2px #FFBF00;
+             /* Using Amber/Gold for highlight */
+            box-shadow: inset 0 0 0 2px #FFBF00;
         }
 
 
@@ -43,8 +45,9 @@
             min-height: 2.5rem;
         }
 
-        /* Highlight styling */
+        /* Highlight styling for labels */
         .highlight-label {
+            /* Using teal accent for highlighted labels */
             background-color: #134e4a; /* bg-teal-800 */
             color: #ccfbf1; /* text-teal-100 */
             @apply font-bold;
@@ -56,18 +59,18 @@
             gap: 2px;
             background-color: #374151; /* bg-gray-700 */
             @apply p-2 rounded-lg overflow-auto shadow-lg;
-            max-width: 90vw;
-            max-height: 75vh;
-            margin: auto;
+            max-width: 90vw; /* Limit width */
+            max-height: 75vh; /* Limit height */
+            margin: auto; /* Center if needed within wrapper */
         }
 
-        /* Sequence details */
+        /* Sequence details box */
          #sequenceDetails {
-            min-height: 4.5em;
+            min-height: 4.5em; /* Ensure space for messages */
             background-color: #1f2937; /* bg-gray-800 */
             color: #d1d5db; /* text-gray-300 */
             @apply p-4 mb-6 border border-gray-700 rounded-lg shadow-md;
-            word-break: break-all;
+            word-break: break-all; /* Prevent long sequences from overflowing */
          }
 
         /* Input style */
@@ -75,27 +78,61 @@
              background-color: #374151; /* bg-gray-700 */
              color: #f9fafb; /* text-gray-50 */
              border-color: #4b5563; /* border-gray-600 */
+             /* Kept teal focus ring */
              @apply px-4 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400;
+         }
+
+         /* Added style for gradient text for the header */
+         .gradient-text {
+            background-image: linear-gradient(to right, #a78bfa, #ec4899, #ef4444); /* from-purple-400 via-pink-500 to-red-500 */
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+         }
+         /* Style for error text */
+        .error-text {
+            color: #f87171; /* text-red-400 */
+        }
+        /* Style for highlight text in details */
+        .highlight-text {
+            color: #5eead4; /* text-teal-300 - kept teal for consistency */
         }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
 
-    <h1 class="text-2xl md:text-3xl font-bold text-center mb-6" style="color: #5eead4;">Sum Sequence Modular Matrix</h1>
-
-    <div class="flex flex-wrap justify-center items-center gap-4 mb-6">
-        <label for="modulusInput" class="font-medium" style="color: #d1d5db;">Modulus (n):</label>
-        <input type="number" id="modulusInput" min="2" max="50" value="10" class="w-20 text-center">
-    </div>
-
-    <div id="sequenceDetails" class="text-center text-sm">
-        Enter a modulus (2-50). Grid will generate automatically. Click a square for details.
-    </div>
-
-    <div id="gridContainerWrapper" class="flex justify-center">
-         <div id="gridContainer">
+    <header class="py-4 px-4 md:px-8 bg-gray-800 shadow-md rounded-b-lg mb-8 w-full">
+        <div class="container mx-auto flex justify-center md:justify-start">
+             <a href="../index.html" class="text-decoration-none">
+                <h1 class="text-4xl md:text-5xl font-bold gradient-text pb-1">
+                    Trevorything.ai
+                </h1>
+            </a>
             </div>
-    </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 flex-grow w-full">
+
+        <h2 class="text-xl md:text-2xl font-semibold text-center text-gray-200 mb-6">Sum Sequence Modular Matrix</h2>
+
+        <div class="flex flex-wrap justify-center items-center gap-4 mb-6">
+             <label for="modulusInput" class="font-medium text-gray-300">Modulus (n):</label>
+            <input type="number" id="modulusInput" min="2" max="50" value="10" class="w-20 text-center">
+        </div>
+
+        <div id="sequenceDetails" class="text-center text-sm max-w-4xl mx-auto">
+            Enter a modulus (2-50). Grid will generate automatically. Click a square for details.
+        </div>
+
+        <div id="gridContainerWrapper" class="flex justify-center">
+             <div id="gridContainer">
+                 </div>
+        </div>
+    </main>
+
+    <footer class="mt-12 py-6 px-4 text-center text-gray-400 border-t border-gray-700 w-full">
+         <p>&copy; <span id="currentYear"></span> Trevorything.ai. All rights reserved.</p>
+    </footer>
 
     <script>
         // DOM Elements
@@ -118,8 +155,6 @@
         function debounce(func, delay) {
             return function(...args) {
                 clearTimeout(debounceTimer);
-                // Keep current details visible while waiting, or show 'waiting'
-                // sequenceDetails.textContent = 'Waiting for input...';
                 debounceTimer = setTimeout(() => {
                     func.apply(this, args);
                 }, delay);
@@ -135,21 +170,27 @@
 
             const n = parseInt(modulusInput.value);
             if (isNaN(n) || n < 2 || n > 50) {
-                sequenceDetails.innerHTML = `<strong style="color: #f87171;">Error:</strong> Please enter a valid modulus (n) between 2 and 50.`;
+                // Use error class for styling
+                sequenceDetails.innerHTML = `<strong class="error-text">Error:</strong> Please enter a valid modulus (n) between 2 and 50.`;
                 gridContainer.innerHTML = '';
                 sequences = []; cellInfo.clear(); cellElements.clear(); currentModulus = 0;
                 return;
             }
 
+            // Prevent unnecessary regeneration
             if (n === currentModulus && sequences.length > 0) {
-                 selectedPair = previousSelectedPair; // Restore selection state
-                 if(selectedPair) {
+                selectedPair = previousSelectedPair; // Restore selection state
+                if(selectedPair) {
                     const pairStr = `${selectedPair[0]},${selectedPair[1]}`;
                     const info = cellInfo.get(pairStr);
                     if(info) highlightedSequenceIndex = info.sequenceIndex;
-                 }
-                 sequenceDetails.textContent = `Grid for n=${n} already shown. Click a square for details.`;
-                 return;
+                }
+                sequenceDetails.textContent = `Grid for n=${n} already shown. Click a square for details.`;
+                // Restore highlight and details if a pair was selected
+                if(selectedPair && highlightedSequenceIndex !== null) {
+                     handleSquareClick(selectedPair[0], selectedPair[1], highlightedSequenceIndex);
+                }
+                return;
             }
 
             currentModulus = n;
@@ -191,8 +232,9 @@
                     if (b.length !== a.length) return b.length - a.length;
                     return a.index - b.index;
                 });
-                const startH = 177, startS = 38, startL = 28; // #2C6360
-                const endH = 0, endS = 0, endL = 85;     // Light Gray
+                // Adjusted gradient range for dark theme (starts darker teal, ends lighter gray)
+                const startH = 177, startS = 38, startL = 20; // Darker Teal Start
+                const endH = 210, endS = 5, endL = 65;   // Lighter Gray End
                 const deltaH = endH - startH; const deltaS = endS - startS; const deltaL = endL - startL;
                 const steps = numSequences > 1 ? numSequences - 1 : 1;
                 const stepH = deltaH / steps; const stepS = deltaS / steps; const stepL = deltaL / steps;
@@ -200,7 +242,7 @@
                 sequenceInfo.forEach((info, rank) => {
                     const originalIndex = info.index; const sequence = sequences[originalIndex];
                     let color;
-                    if (numSequences === 1) { color = 'hsl(0, 0%, 40%)'; }
+                    if (numSequences === 1) { color = 'hsl(220, 10%, 40%)'; } // Mid-gray for single sequence
                     else {
                         const H = startH + rank * stepH;
                         const S = Math.max(0, Math.min(100, startS + rank * stepS));
@@ -231,7 +273,9 @@
                     const pairStr = `${i},${j}`; const info = cellInfo.get(pairStr);
                     cellElements.set(pairStr, cell); // Store cell element
                     if (info && info.color) {
-                        cell.style.backgroundColor = info.color; cell.style.borderColor = 'hsl(0, 0%, 25%)';
+                        cell.style.backgroundColor = info.color;
+                         // Use a slightly darker border for contrast within the grid
+                        cell.style.borderColor = 'hsl(220, 10%, 25%)';
                         const sequence = sequences[info.sequenceIndex];
                         cell.title = `Pair: (${i}, ${j})\nSequence Index: ${info.sequenceIndex}\nLength: ${sequence.length}`;
                         cell.addEventListener('click', () => handleSquareClick(i, j, info.sequenceIndex));
@@ -266,7 +310,11 @@
              if (!sequenceToClear) { highlightedSequenceIndex = null; selectedPair = null; return; }
             sequenceToClear.forEach(pair => {
                 const pairStr = `${pair[0]},${pair[1]}`; const cellElement = cellElements.get(pairStr); const originalInfo = cellInfo.get(pairStr);
-                if (cellElement && originalInfo) { cellElement.style.backgroundColor = originalInfo.color; cellElement.style.boxShadow = ''; }
+                if (cellElement && originalInfo) {
+                    cellElement.style.backgroundColor = originalInfo.color;
+                    cellElement.style.boxShadow = ''; // Remove highlight shadow
+                    cellElement.classList.remove('highlight-sequence'); // Remove class if used
+                }
             });
             highlightedSequenceIndex = null; selectedPair = null;
         }
@@ -275,10 +323,15 @@
              if (sequenceIndex === null || sequenceIndex >= sequences.length) return;
              const sequenceToHighlight = sequences[sequenceIndex];
              if (!sequenceToHighlight) return;
-            const highlightColorStyle = '#FFBF00';
+            const highlightColorStyle = '#FFBF00'; // Amber/Gold highlight color
             sequenceToHighlight.forEach(pair => {
                 const pairStr = `${pair[0]},${pair[1]}`; const cellElement = cellElements.get(pairStr);
-                if (cellElement) { cellElement.style.backgroundColor = highlightColorStyle; cellElement.style.boxShadow = `inset 0 0 0 2px ${highlightColorStyle}`; }
+                if (cellElement) {
+                     // Keep background color for the highlighted sequence
+                    cellElement.style.backgroundColor = highlightColorStyle;
+                    // Add border/shadow effect using class defined in CSS
+                    cellElement.classList.add('highlight-sequence');
+                }
             });
             highlightedSequenceIndex = sequenceIndex; selectedPair = [row, col];
         }
@@ -286,63 +339,80 @@
         function handleSquareClick(row, col, sequenceIndex) {
              if (sequenceIndex === undefined || sequenceIndex >= sequences.length) {
                  console.error("Invalid sequence index on click:", sequenceIndex);
-                 sequenceDetails.innerHTML = `<strong style="color: #f87171;">Error:</strong> Error retrieving sequence for square (${row}, ${col}).`;
+                 // Use error class for styling
+                 sequenceDetails.innerHTML = `<strong class="error-text">Error:</strong> Error retrieving sequence for square (${row}, ${col}).`;
                  return;
-            }
-            const previouslyHighlightedIndex = highlightedSequenceIndex;
-            removeSequenceHighlight(); // Clear previous highlight and selectedPair state
+             }
+             const previouslyHighlightedIndex = highlightedSequenceIndex;
+             const wasSameCellClicked = selectedPair && selectedPair[0] === row && selectedPair[1] === col;
 
-            // Apply highlight only if it wasn't the one already highlighted (toggle-off)
-            if (previouslyHighlightedIndex !== sequenceIndex) {
-                 applySequenceHighlight(sequenceIndex, row, col); // This sets highlightedSequenceIndex and selectedPair
-            }
+             removeSequenceHighlight(); // Clear previous highlight and selectedPair state
 
-            // --- Details Display ---
-            if (highlightedSequenceIndex !== null) { // Check if a sequence is now highlighted
-                const sequence = sequences[highlightedSequenceIndex]; // Use the currently highlighted index
-                const totalCells = currentModulus * currentModulus;
-                const percentage = totalCells > 0 ? (sequence.length / totalCells) * 100 : 0;
-                const maxDisplayLength = 100; // Limit displayed sequence length
+             // Apply highlight only if clicking a *different* sequence or re-clicking the same cell to toggle back on
+             if (previouslyHighlightedIndex !== sequenceIndex || !wasSameCellClicked || previouslyHighlightedIndex === null) {
+                  applySequenceHighlight(sequenceIndex, row, col); // This sets highlightedSequenceIndex and selectedPair
+             }
+             // If the same cell was clicked and it *was* highlighted, removeSequenceHighlight() already handled toggling off.
 
-                // --- Reorder sequence for display starting from clicked cell ---
-                let displaySequence = sequence; // Default to original order
-                const startIndex = sequence.findIndex(pair => pair[0] === row && pair[1] === col);
-                if (startIndex !== -1) {
-                    const part1 = sequence.slice(startIndex);
-                    const part2 = sequence.slice(0, startIndex);
-                    displaySequence = part1.concat(part2);
-                }
-                // --- End of reordering ---
 
-                let sequenceString = displaySequence.map(pair => `(${pair[0]},${pair[1]})`).slice(0, maxDisplayLength).join(' → ');
-                if (sequence.length > maxDisplayLength) {
-                    sequenceString += ` → ... (Total ${sequence.length} pairs)`;
-                }
-                const highlightColor = '#5eead4';
-                sequenceDetails.innerHTML = `
-                    <strong style="color: ${highlightColor};">Pair:</strong> (${row}, ${col})<br>
-                    <strong style="color: ${highlightColor};">Grid Coverage:</strong> ${percentage.toFixed(2)}%<br>
-                    <strong style="color: ${highlightColor};">Sequence Length:</strong> ${sequence.length}<br>
-                    <strong style="color: ${highlightColor};">Sequence:</strong> ${sequenceString}
-                `;
-            } else { // If highlight was toggled off
-                 sequenceDetails.textContent = `Generated grid for n=${currentModulus}. Found ${sequences.length} distinct sequences. Click a square for details.`;
-            }
+             // --- Details Display ---
+             if (highlightedSequenceIndex !== null) { // Check if a sequence is now highlighted
+                 const sequence = sequences[highlightedSequenceIndex]; // Use the currently highlighted index
+                 const totalCells = currentModulus * currentModulus;
+                 const percentage = totalCells > 0 ? (sequence.length / totalCells) * 100 : 0;
+                 const maxDisplayLength = 100; // Limit displayed sequence length
 
-            // --- Label Highlighting ---
-            colLabels.forEach(lbl => lbl.classList.remove('highlight-label'));
-            rowLabels.forEach(lbl => lbl.classList.remove('highlight-label'));
-            if (highlightedSequenceIndex !== null) { // Only highlight labels if selected
-                if (colLabels[col]) colLabels[col].classList.add('highlight-label');
-                if (rowLabels[row]) rowLabels[row].classList.add('highlight-label');
-            }
+                 // --- Reorder sequence for display starting from clicked cell ---
+                 let displaySequence = sequence; // Default to original order
+                 const startIndex = sequence.findIndex(pair => pair[0] === row && pair[1] === col);
+                 if (startIndex !== -1) {
+                     const part1 = sequence.slice(startIndex);
+                     const part2 = sequence.slice(0, startIndex);
+                     displaySequence = part1.concat(part2);
+                 }
+                 // --- End of reordering ---
+
+                 let sequenceString = displaySequence.map(pair => `(${pair[0]},${pair[1]})`).slice(0, maxDisplayLength).join(' <span class="text-gray-500">→</span> '); // Added subtle arrow color
+                 if (sequence.length > maxDisplayLength) {
+                     sequenceString += ` <span class="text-gray-500">→</span> ... (Total ${sequence.length} pairs)`;
+                 }
+
+                 // Use CSS classes for highlighting text
+                 sequenceDetails.innerHTML = `
+                     <strong class="highlight-text">Pair:</strong> (${row}, ${col})<br>
+                     <strong class="highlight-text">Grid Coverage:</strong> ${percentage.toFixed(2)}%<br>
+                     <strong class="highlight-text">Sequence Length:</strong> ${sequence.length}<br>
+                     <strong class="highlight-text">Sequence:</strong> ${sequenceString}
+                 `;
+             } else { // If highlight was toggled off
+                  sequenceDetails.textContent = `Generated grid for n=${currentModulus}. Found ${sequences.length} distinct sequences. Click a square for details.`;
+             }
+
+             // --- Label Highlighting ---
+             colLabels.forEach(lbl => lbl.classList.remove('highlight-label'));
+             rowLabels.forEach(lbl => lbl.classList.remove('highlight-label'));
+             if (highlightedSequenceIndex !== null) { // Only highlight labels if selected
+                 if (colLabels[col]) colLabels[col].classList.add('highlight-label');
+                 if (rowLabels[row]) rowLabels[row].classList.add('highlight-label');
+             }
+        }
+
+        // --- Footer Year Update ---
+        function updateFooterYear() {
+             const currentYearElement = document.getElementById('currentYear');
+             if (currentYearElement) {
+                 currentYearElement.textContent = new Date().getFullYear();
+             }
         }
 
         // --- Event Listeners ---
         modulusInput.addEventListener('input', debounce(generateGrid, 400));
 
-        // Generate initial grid on load
-        generateGrid();
+        // --- Initial Load ---
+        window.addEventListener('load', () => {
+            generateGrid(); // Generate initial grid
+            updateFooterYear(); // Set footer year
+        });
 
     </script>
 
