@@ -7,414 +7,290 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../shared.css">
     <style>
-        /* Basic styles */
-        body {
-            font-family: 'Inter', sans-serif;
-            /* Ensured dark background and light text */
-            background-color: #111827; /* bg-gray-900 */
-            color: #f3f4f6; /* text-gray-100 */
+        /* Page-specific styles */
+        .panel {
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            margin-bottom: 2rem;
         }
 
-        /* Grid cell styling */
-        .grid-cell {
-            @apply border border-gray-600 flex items-center justify-center text-xs transition-all duration-150 cursor-pointer relative overflow-hidden;
-            aspect-ratio: 1 / 1;
-            transition: background-color 0.2s ease-in-out, transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            text-align: center;
+            margin-bottom: 1.5rem;
         }
 
-        .grid-cell:hover {
-             /* Kept teal accent for hover consistency within this page */
-            @apply ring-2 ring-offset-2 ring-teal-400 ring-offset-gray-900 z-10;
-            transform: scale(1.1);
-        }
-        /* Style for highlighted sequence cells */
-        .highlight-sequence {
-             /* Using Amber/Gold for highlight */
-            box-shadow: inset 0 0 0 2px #FFBF00;
+        .controls-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
 
-
-        /* Label styling */
-        .label {
-            background-color: #1f2937; /* bg-gray-800 */
-            color: #d1d5db; /* text-gray-300 */
-            @apply flex items-center justify-center font-semibold text-sm p-1;
-            min-width: 2.5rem;
-            min-height: 2.5rem;
+        .controls-container label {
+            font-weight: 500;
+            color: var(--color-text-secondary);
         }
 
-        /* Highlight styling for labels */
-        .highlight-label {
-            /* Using teal accent for highlighted labels */
-            background-color: #134e4a; /* bg-teal-800 */
-            color: #ccfbf1; /* text-teal-100 */
-            @apply font-bold;
+        input[type="number"] {
+            width: 80px;
+            text-align: center;
+            background-color: #0D1117;
+            border: 1px solid var(--color-border);
+            color: var(--color-text-primary);
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--color-accent-primary);
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
         }
 
-        /* Grid container */
+        #sequenceDetails {
+            min-height: 5em;
+            padding: 1rem 1.5rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            text-align: center;
+            word-break: break-all;
+        }
+        #sequenceDetails .highlight {
+            color: var(--color-accent-primary);
+            font-weight: 600;
+        }
+        #sequenceDetails .error {
+            color: #F87171;
+            font-weight: 600;
+        }
+
+        #gridContainerWrapper {
+            display: flex;
+            justify-content: center;
+            padding: 1rem;
+            background-color: #0D1117;
+            border-radius: 0.5rem;
+        }
+
         #gridContainer {
             display: grid;
             gap: 2px;
-            background-color: #374151; /* bg-gray-700 */
-            @apply p-2 rounded-lg overflow-auto shadow-lg;
-            max-width: 90vw; /* Limit width */
-            max-height: 75vh; /* Limit height */
-            margin: auto; /* Center if needed within wrapper */
+            border: 1px solid var(--color-border);
+            padding: 0.25rem;
+            border-radius: 0.375rem;
+            max-width: 90vw;
+            max-height: 75vh;
+            overflow: auto;
         }
 
-        /* Sequence details box */
-         #sequenceDetails {
-            min-height: 4.5em; /* Ensure space for messages */
-            background-color: #1f2937; /* bg-gray-800 */
-            color: #d1d5db; /* text-gray-300 */
-            @apply p-4 mb-6 border border-gray-700 rounded-lg shadow-md;
-            word-break: break-all; /* Prevent long sequences from overflowing */
-         }
-
-        /* Input style */
-        input[type="number"] {
-             background-color: #374151; /* bg-gray-700 */
-             color: #f9fafb; /* text-gray-50 */
-             border-color: #4b5563; /* border-gray-600 */
-             /* Kept teal focus ring */
-             @apply px-4 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400;
-         }
-
-         /* Added style for gradient text for the header */
-         .gradient-text {
-            background-image: linear-gradient(to right, #a78bfa, #ec4899, #ef4444); /* from-purple-400 via-pink-500 to-red-500 */
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-         }
-         /* Style for error text */
-        .error-text {
-            color: #f87171; /* text-red-400 */
+        .grid-cell {
+            aspect-ratio: 1 / 1;
+            min-width: 20px;
+            min-height: 20px;
+            border: 1px solid var(--color-border);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            cursor: pointer;
         }
-        /* Style for highlight text in details */
-        .highlight-text {
-            color: #5eead4; /* text-teal-300 - kept teal for consistency */
+        .grid-cell:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 2px var(--color-accent-primary);
+            z-index: 10;
+        }
+
+        .label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            background-color: var(--color-surface);
+            min-width: 20px;
+            min-height: 20px;
+        }
+        .highlight-label {
+            background-color: var(--color-accent-primary) !important;
+            color: var(--color-background) !important;
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
+<body>
 
-    <header class="py-4 px-4 md:px-8 bg-gray-800 shadow-md rounded-b-lg mb-8 w-full">
-        <div class="container mx-auto flex justify-center md:justify-start">
-             <a href="../index.html" class="text-decoration-none">
-                <h1 class="text-4xl md:text-5xl font-bold gradient-text pb-1">
-                    Trevorything.ai
-                </h1>
-            </a>
+    <header class="shared-header">
+        <div class="header-container">
+            <div class="site-title">
+                <a href="../index.html"><h1>Trevorything.ai</h1></a>
             </div>
+            <nav class="main-nav">
+                <a href="../Sum Sequence Path/index.html">Sum Sequence Path</a>
+                <a href="../Sum Sequence Matrix/index.html">Sum Sequence Matrix</a>
+            </nav>
+        </div>
     </header>
 
-    <main class="container mx-auto px-4 py-8 flex-grow w-full">
-
-        <h2 class="text-xl md:text-2xl font-semibold text-center text-gray-200 mb-6">Sum Sequence Modular Matrix</h2>
-
-        <div class="flex flex-wrap justify-center items-center gap-4 mb-6">
-             <label for="modulusInput" class="font-medium text-gray-300">Modulus (n):</label>
-            <input type="number" id="modulusInput" min="2" max="50" value="10" class="w-20 text-center">
-        </div>
-
-        <div id="sequenceDetails" class="text-center text-sm max-w-4xl mx-auto">
-            Enter a modulus (2-50). Grid will generate automatically. Click a square for details.
-        </div>
-
-        <div id="gridContainerWrapper" class="flex justify-center">
-             <div id="gridContainer">
-                 </div>
+    <main class="container">
+        <div class="panel">
+            <h2 class="panel-title">Sum Sequence Modular Matrix</h2>
+            <div class="controls-container">
+                <label for="modulusInput">Modulus (n):</label>
+                <input type="number" id="modulusInput" min="2" max="50" value="10">
+            </div>
+            <div id="sequenceDetails" class="panel">
+                Enter a modulus (2-50). The grid will generate automatically. Click a square for details.
+            </div>
+            <div id="gridContainerWrapper">
+                <div id="gridContainer"></div>
+            </div>
         </div>
     </main>
 
-    <footer class="mt-12 py-6 px-4 text-center text-gray-400 border-t border-gray-700 w-full">
-         <p>&copy; <span id="currentYear"></span> Trevorything.ai. All rights reserved.</p>
+    <footer class="shared-footer">
+        <p>&copy; <span id="currentYear"></span> Trevorything.ai. All rights reserved.</p>
     </footer>
 
     <script>
-        // DOM Elements
         const modulusInput = document.getElementById('modulusInput');
         const gridContainer = document.getElementById('gridContainer');
         const sequenceDetails = document.getElementById('sequenceDetails');
 
-        // Global state
-        let sequences = [];
-        let cellInfo = new Map(); // Stores { sequenceIndex, color } for each "row,col"
-        let cellElements = new Map(); // Stores DOM element for each "row,col"
-        let currentModulus = 0;
-        let colLabels = [];
-        let rowLabels = [];
+        let sequences = [], cellInfo = new Map(), cellElements = new Map();
+        let currentModulus = 0, colLabels = [], rowLabels = [];
+        let highlightedSequenceIndex = null, selectedPair = null;
         let debounceTimer;
-        let highlightedSequenceIndex = null; // Track the currently highlighted sequence index
-        let selectedPair = null; // Track the coordinates [row, col] of the selected cell
 
-        // --- Debounce Function ---
         function debounce(func, delay) {
-            return function(...args) {
+            return (...args) => {
                 clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => {
-                    func.apply(this, args);
-                }, delay);
+                debounceTimer = setTimeout(() => func.apply(this, args), delay);
             };
         }
 
-        // --- Grid Generation Logic ---
         function generateGrid() {
-            clearTimeout(debounceTimer);
-            const previousSelectedPair = selectedPair;
-            selectedPair = null;
-            highlightedSequenceIndex = null;
-
             const n = parseInt(modulusInput.value);
             if (isNaN(n) || n < 2 || n > 50) {
-                // Use error class for styling
-                sequenceDetails.innerHTML = `<strong class="error-text">Error:</strong> Please enter a valid modulus (n) between 2 and 50.`;
+                sequenceDetails.innerHTML = `<span class="error">Error:</span> Please enter a valid modulus (n) between 2 and 50.`;
                 gridContainer.innerHTML = '';
-                sequences = []; cellInfo.clear(); cellElements.clear(); currentModulus = 0;
                 return;
             }
-
-            // Prevent unnecessary regeneration
-            if (n === currentModulus && sequences.length > 0) {
-                selectedPair = previousSelectedPair; // Restore selection state
-                if(selectedPair) {
-                    const pairStr = `${selectedPair[0]},${selectedPair[1]}`;
-                    const info = cellInfo.get(pairStr);
-                    if(info) highlightedSequenceIndex = info.sequenceIndex;
-                }
-                sequenceDetails.textContent = `Grid for n=${n} already shown. Click a square for details.`;
-                // Restore highlight and details if a pair was selected
-                if(selectedPair && highlightedSequenceIndex !== null) {
-                     handleSquareClick(selectedPair[0], selectedPair[1], highlightedSequenceIndex);
-                }
-                return;
-            }
-
+            if (n === currentModulus) return;
             currentModulus = n;
+            sequenceDetails.textContent = 'Generating...';
             gridContainer.innerHTML = '';
-            sequenceDetails.textContent = 'Generating... Please wait.';
             sequences = []; cellInfo.clear(); cellElements.clear(); colLabels = []; rowLabels = [];
-            const visited = new Set();
 
-            // --- Find all sequences/cycles ---
-            let tempCellInfo = new Map();
+            const visited = new Set();
             let sequenceIndex = 0;
-            for (let startRow = 0; startRow < n; startRow++) {
-                for (let startCol = 0; startCol < n; startCol++) {
-                    const startPairStr = `${startRow},${startCol}`;
-                    if (!visited.has(startPairStr)) {
-                        const currentSequence = [];
-                        let currentRow = startRow; let currentCol = startCol;
-                        let currentPairStr = `${currentRow},${currentCol}`;
-                        while (!visited.has(currentPairStr)) {
-                            visited.add(currentPairStr);
-                            currentSequence.push([currentRow, currentCol]);
-                            tempCellInfo.set(currentPairStr, { sequenceIndex });
-                            const nextRow = currentCol;
-                            const nextCol = (currentRow + currentCol) % n;
-                            currentRow = nextRow; currentCol = nextCol;
-                            currentPairStr = `${currentRow},${currentCol}`;
-                        }
-                        sequences.push(currentSequence);
-                        sequenceIndex++;
+            for (let r = 0; r < n; r++) {
+                for (let c = 0; c < n; c++) {
+                    const startPair = `${r},${c}`;
+                    if (visited.has(startPair)) continue;
+                    const currentSequence = [];
+                    let pairStr = startPair;
+                    while (!visited.has(pairStr)) {
+                        visited.add(pairStr);
+                        const [row, col] = pairStr.split(',').map(Number);
+                        currentSequence.push([row, col]);
+                        cellInfo.set(pairStr, { sequenceIndex });
+                        pairStr = `${col},${(row + col) % n}`;
                     }
+                    sequences.push(currentSequence);
+                    sequenceIndex++;
                 }
             }
 
-            // --- Calculate Colors Based on Sequence Rank ---
-            const numSequences = sequences.length;
-            if (numSequences > 0) {
-                const sequenceInfo = sequences.map((seq, index) => ({ index, length: seq.length }));
-                sequenceInfo.sort((a, b) => {
-                    if (b.length !== a.length) return b.length - a.length;
-                    return a.index - b.index;
-                });
-                // Adjusted gradient range for dark theme (starts darker teal, ends lighter gray)
-                const startH = 177, startS = 38, startL = 20; // Darker Teal Start
-                const endH = 210, endS = 5, endL = 65;   // Lighter Gray End
-                const deltaH = endH - startH; const deltaS = endS - startS; const deltaL = endL - startL;
-                const steps = numSequences > 1 ? numSequences - 1 : 1;
-                const stepH = deltaH / steps; const stepS = deltaS / steps; const stepL = deltaL / steps;
+            const sortedSequences = sequences.map((s, i) => ({ len: s.length, index: i }))
+                .sort((a, b) => b.len - a.len || a.index - b.index);
 
-                sequenceInfo.forEach((info, rank) => {
-                    const originalIndex = info.index; const sequence = sequences[originalIndex];
-                    let color;
-                    if (numSequences === 1) { color = 'hsl(220, 10%, 40%)'; } // Mid-gray for single sequence
-                    else {
-                        const H = startH + rank * stepH;
-                        const S = Math.max(0, Math.min(100, startS + rank * stepS));
-                        const L = Math.max(0, Math.min(100, startL + rank * stepL));
-                        const finalH = (H % 360 + 360) % 360;
-                        color = `hsl(${finalH}, ${S}%, ${L}%)`;
-                    }
-                    sequence.forEach(pair => {
-                        const pairStr = `${pair[0]},${pair[1]}`;
-                        cellInfo.set(pairStr, { sequenceIndex: originalIndex, color: color });
-                    });
+            sortedSequences.forEach(({ index }, rank) => {
+                const hue = 200 + (rank / sortedSequences.length) * 120; // Blue to purple/pink
+                const color = `hsl(${hue}, 60%, 30%)`;
+                sequences[index].forEach(pair => {
+                    const info = cellInfo.get(`${pair[0]},${pair[1]}`);
+                    info.color = color;
                 });
-            }
+            });
 
-            // --- Create Grid Structure with Labels ---
-            gridContainer.style.gridTemplateColumns = `auto repeat(${n}, minmax(25px, 1fr))`;
-            gridContainer.style.gridTemplateRows = `auto repeat(${n}, minmax(25px, 1fr))`;
-            const corner = document.createElement('div'); corner.className = 'label'; gridContainer.appendChild(corner);
-            for (let j = 0; j < n; j++) { /* Add col labels */
-                const label = document.createElement('div'); label.className = 'label col-label'; label.textContent = j; label.dataset.colIndex = j;
+            gridContainer.style.gridTemplateColumns = `auto repeat(${n}, minmax(20px, 1fr))`;
+            gridContainer.style.gridTemplateRows = `auto repeat(${n}, minmax(20px, 1fr))`;
+            gridContainer.appendChild(document.createElement('div')).className = 'label';
+
+            for (let j = 0; j < n; j++) {
+                const label = document.createElement('div');
+                label.className = 'label col-label'; label.textContent = j;
                 gridContainer.appendChild(label); colLabels.push(label);
             }
-            for (let i = 0; i < n; i++) { /* Add row labels and cells */
-                const rowLabel = document.createElement('div'); rowLabel.className = 'label row-label'; rowLabel.textContent = i; rowLabel.dataset.rowIndex = i;
+
+            for (let i = 0; i < n; i++) {
+                const rowLabel = document.createElement('div');
+                rowLabel.className = 'label row-label'; rowLabel.textContent = i;
                 gridContainer.appendChild(rowLabel); rowLabels.push(rowLabel);
                 for (let j = 0; j < n; j++) {
-                    const cell = document.createElement('div'); cell.className = 'grid-cell'; cell.dataset.row = i; cell.dataset.col = j;
-                    const pairStr = `${i},${j}`; const info = cellInfo.get(pairStr);
-                    cellElements.set(pairStr, cell); // Store cell element
-                    if (info && info.color) {
-                        cell.style.backgroundColor = info.color;
-                         // Use a slightly darker border for contrast within the grid
-                        cell.style.borderColor = 'hsl(220, 10%, 25%)';
-                        const sequence = sequences[info.sequenceIndex];
-                        cell.title = `Pair: (${i}, ${j})\nSequence Index: ${info.sequenceIndex}\nLength: ${sequence.length}`;
-                        cell.addEventListener('click', () => handleSquareClick(i, j, info.sequenceIndex));
-                    } else { /* Error case */
-                        cell.style.backgroundColor = 'hsl(220, 13%, 22%)'; cell.title = `Pair: (${i}, ${j}) - Error: No sequence info`;
-                        console.error(`Cell (${i}, ${j}) missing info or color.`);
-                    }
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    const pairStr = `${i},${j}`;
+                    const info = cellInfo.get(pairStr);
+                    cell.style.backgroundColor = info.color;
+                    cell.addEventListener('click', () => handleSquareClick(i, j, info.sequenceIndex));
                     gridContainer.appendChild(cell);
+                    cellElements.set(pairStr, cell);
                 }
             }
+            sequenceDetails.innerHTML = `Generated grid for n=<span class="highlight">${n}</span>. Found <span class="highlight">${sequences.length}</span> distinct sequences.`;
+        }
 
-            sequenceDetails.textContent = `Generated grid for n=${n}. Found ${numSequences} distinct sequences. Click a square for details.`;
-
-            // --- Attempt to restore selection ---
-            if (previousSelectedPair) {
-                const [prevRow, prevCol] = previousSelectedPair;
-                if (prevRow < n && prevCol < n) { // Check bounds
-                    const pairStr = `${prevRow},${prevCol}`; const newInfo = cellInfo.get(pairStr);
-                    if (newInfo) { // Check if pair exists in new sequences
-                        handleSquareClick(prevRow, prevCol, newInfo.sequenceIndex); // Simulate click
-                        sequenceDetails.innerHTML += `<br/><em class='text-gray-400'>(Previous selection at (${prevRow}, ${prevCol}) restored)</em>`;
-                    } else { sequenceDetails.innerHTML += `<br/><em class='text-gray-400'>(Previous selection (${prevRow}, ${prevCol}) not found in new grid sequences)</em>`; }
-                } else { sequenceDetails.innerHTML += `<br/><em class='text-gray-400'>(Previous selection (${prevRow}, ${prevCol}) out of bounds for n=${n})</em>`; }
+        function handleSquareClick(row, col, seqIndex) {
+            if (highlightedSequenceIndex !== null) {
+                sequences[highlightedSequenceIndex].forEach(p => {
+                    const el = cellElements.get(`${p[0]},${p[1]}`);
+                    if (el) el.style.boxShadow = '';
+                });
             }
-        }
+            colLabels.forEach(lbl => lbl.classList.remove('highlight-label'));
+            rowLabels.forEach(lbl => lbl.classList.remove('highlight-label'));
 
-        // --- Interaction Logic ---
+            if (highlightedSequenceIndex === seqIndex) {
+                highlightedSequenceIndex = null;
+                sequenceDetails.innerHTML = `Generated grid for n=<span class="highlight">${currentModulus}</span>. Found <span class="highlight">${sequences.length}</span> distinct sequences.`;
+                return;
+            }
 
-        function removeSequenceHighlight() {
-            if (highlightedSequenceIndex === null || highlightedSequenceIndex >= sequences.length) return;
-            const sequenceToClear = sequences[highlightedSequenceIndex];
-             if (!sequenceToClear) { highlightedSequenceIndex = null; selectedPair = null; return; }
-            sequenceToClear.forEach(pair => {
-                const pairStr = `${pair[0]},${pair[1]}`; const cellElement = cellElements.get(pairStr); const originalInfo = cellInfo.get(pairStr);
-                if (cellElement && originalInfo) {
-                    cellElement.style.backgroundColor = originalInfo.color;
-                    cellElement.style.boxShadow = ''; // Remove highlight shadow
-                    cellElement.classList.remove('highlight-sequence'); // Remove class if used
-                }
+            highlightedSequenceIndex = seqIndex;
+            const sequence = sequences[seqIndex];
+            sequence.forEach(p => {
+                const el = cellElements.get(`${p[0]},${p[1]}`);
+                if (el) el.style.boxShadow = `inset 0 0 0 2px var(--color-accent-primary)`;
             });
-            highlightedSequenceIndex = null; selectedPair = null;
+
+            if (colLabels[col]) colLabels[col].classList.add('highlight-label');
+            if (rowLabels[row]) rowLabels[row].classList.add('highlight-label');
+
+            const percentage = (sequence.length / (currentModulus * currentModulus) * 100).toFixed(2);
+            sequenceDetails.innerHTML = `
+                <strong class="highlight">Pair:</strong> (${row}, ${col}) |
+                <strong class="highlight">Length:</strong> ${sequence.length} |
+                <strong class="highlight">Coverage:</strong> ${percentage}%
+            `;
         }
 
-        function applySequenceHighlight(sequenceIndex, row, col) {
-             if (sequenceIndex === null || sequenceIndex >= sequences.length) return;
-             const sequenceToHighlight = sequences[sequenceIndex];
-             if (!sequenceToHighlight) return;
-            const highlightColorStyle = '#FFBF00'; // Amber/Gold highlight color
-            sequenceToHighlight.forEach(pair => {
-                const pairStr = `${pair[0]},${pair[1]}`; const cellElement = cellElements.get(pairStr);
-                if (cellElement) {
-                     // Keep background color for the highlighted sequence
-                    cellElement.style.backgroundColor = highlightColorStyle;
-                    // Add border/shadow effect using class defined in CSS
-                    cellElement.classList.add('highlight-sequence');
-                }
-            });
-            highlightedSequenceIndex = sequenceIndex; selectedPair = [row, col];
-        }
-
-        function handleSquareClick(row, col, sequenceIndex) {
-             if (sequenceIndex === undefined || sequenceIndex >= sequences.length) {
-                 console.error("Invalid sequence index on click:", sequenceIndex);
-                 // Use error class for styling
-                 sequenceDetails.innerHTML = `<strong class="error-text">Error:</strong> Error retrieving sequence for square (${row}, ${col}).`;
-                 return;
-             }
-             const previouslyHighlightedIndex = highlightedSequenceIndex;
-             const wasSameCellClicked = selectedPair && selectedPair[0] === row && selectedPair[1] === col;
-
-             removeSequenceHighlight(); // Clear previous highlight and selectedPair state
-
-             // Apply highlight only if clicking a *different* sequence or re-clicking the same cell to toggle back on
-             if (previouslyHighlightedIndex !== sequenceIndex || !wasSameCellClicked || previouslyHighlightedIndex === null) {
-                  applySequenceHighlight(sequenceIndex, row, col); // This sets highlightedSequenceIndex and selectedPair
-             }
-             // If the same cell was clicked and it *was* highlighted, removeSequenceHighlight() already handled toggling off.
-
-
-             // --- Details Display ---
-             if (highlightedSequenceIndex !== null) { // Check if a sequence is now highlighted
-                 const sequence = sequences[highlightedSequenceIndex]; // Use the currently highlighted index
-                 const totalCells = currentModulus * currentModulus;
-                 const percentage = totalCells > 0 ? (sequence.length / totalCells) * 100 : 0;
-                 const maxDisplayLength = 100; // Limit displayed sequence length
-
-                 // --- Reorder sequence for display starting from clicked cell ---
-                 let displaySequence = sequence; // Default to original order
-                 const startIndex = sequence.findIndex(pair => pair[0] === row && pair[1] === col);
-                 if (startIndex !== -1) {
-                     const part1 = sequence.slice(startIndex);
-                     const part2 = sequence.slice(0, startIndex);
-                     displaySequence = part1.concat(part2);
-                 }
-                 // --- End of reordering ---
-
-                 let sequenceString = displaySequence.map(pair => `(${pair[0]},${pair[1]})`).slice(0, maxDisplayLength).join(' <span class="text-gray-500">→</span> '); // Added subtle arrow color
-                 if (sequence.length > maxDisplayLength) {
-                     sequenceString += ` <span class="text-gray-500">→</span> ... (Total ${sequence.length} pairs)`;
-                 }
-
-                 // Use CSS classes for highlighting text
-                 sequenceDetails.innerHTML = `
-                     <strong class="highlight-text">Pair:</strong> (${row}, ${col})<br>
-                     <strong class="highlight-text">Grid Coverage:</strong> ${percentage.toFixed(2)}%<br>
-                     <strong class="highlight-text">Sequence Length:</strong> ${sequence.length}<br>
-                     <strong class="highlight-text">Sequence:</strong> ${sequenceString}
-                 `;
-             } else { // If highlight was toggled off
-                  sequenceDetails.textContent = `Generated grid for n=${currentModulus}. Found ${sequences.length} distinct sequences. Click a square for details.`;
-             }
-
-             // --- Label Highlighting ---
-             colLabels.forEach(lbl => lbl.classList.remove('highlight-label'));
-             rowLabels.forEach(lbl => lbl.classList.remove('highlight-label'));
-             if (highlightedSequenceIndex !== null) { // Only highlight labels if selected
-                 if (colLabels[col]) colLabels[col].classList.add('highlight-label');
-                 if (rowLabels[row]) rowLabels[row].classList.add('highlight-label');
-             }
-        }
-
-        // --- Footer Year Update ---
-        function updateFooterYear() {
-             const currentYearElement = document.getElementById('currentYear');
-             if (currentYearElement) {
-                 currentYearElement.textContent = new Date().getFullYear();
-             }
-        }
-
-        // --- Event Listeners ---
-        modulusInput.addEventListener('input', debounce(generateGrid, 400));
-
-        // --- Initial Load ---
-        window.addEventListener('load', () => {
-            generateGrid(); // Generate initial grid
-            updateFooterYear(); // Set footer year
+        document.addEventListener('DOMContentLoaded', () => {
+            modulusInput.addEventListener('input', debounce(generateGrid, 400));
+            generateGrid();
+            const currentYearElement = document.getElementById('currentYear');
+            if (currentYearElement) {
+                currentYearElement.textContent = new Date().getFullYear();
+            }
         });
-
     </script>
-
 </body>
 </html>
