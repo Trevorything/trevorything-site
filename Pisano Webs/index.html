@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pisano Period Visualization</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #FEFF00; /* Updated to specific bright yellow */
+            font-family: 'Courier New', Courier, monospace;
+        }
+        canvas {
+            background-color: transparent;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #fde047;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #000;
+            border-radius: 4px;
+        }
+        .control-input {
+            @apply border-2 border-black bg-white px-3 py-2 rounded-none focus:outline-none focus:ring-2 focus:ring-black transition-all;
+        }
+        /* Button specific styles to center canvas */
+        #animBtn {
+            transition: transform 0.1s;
+        }
+        #animBtn:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-6 text-black">
+
+    <!-- Header & Controls -->
+    <header class="w-full max-w-6xl mb-8 flex flex-col gap-6">
+        <div class="text-center">
+            <h1 class="text-4xl font-bold mb-2 uppercase tracking-tighter">Jacob Yatsko's Pisano Period Webs</h1>
+            <p class="text-sm font-semibold opacity-70">Fibonacci Sequence Modulo M Visualization</p>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-4 items-center justify-center bg-yellow-400 p-6 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+
+            <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold uppercase tracking-wider">Start Num 1</label>
+                <input type="number" id="start1" value="0" class="control-input w-24 text-center text-lg font-bold">
+            </div>
+
+            <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold uppercase tracking-wider">Start Num 2</label>
+                <input type="number" id="start2" value="1" class="control-input w-24 text-center text-lg font-bold">
+            </div>
+
+            <div class="flex flex-col gap-1 flex-grow w-full md:w-auto">
+                <label class="text-xs font-bold uppercase tracking-wider">Modular Systems</label>
+                <input type="text" id="modList" value="1-30" class="control-input w-full text-lg font-bold" placeholder="1, 2, 3... or 1-30">
+            </div>
+
+            <!-- Pattern Button -->
+            <div class="flex flex-col gap-1 items-center">
+                <label class="text-xs font-bold uppercase tracking-wider">Run</label>
+                <button id="animBtn" onclick="initVisualization()" class="bg-black rounded-full w-16 h-16 flex items-center justify-center border-2 border-transparent hover:bg-gray-800 shadow-lg overflow-hidden" title="Animate">
+                    <canvas id="btnCanvas" width="50" height="50"></canvas>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Grid Container -->
+    <main id="gridContainer" class="w-full max-w-7xl flex flex-wrap justify-center gap-8 pb-20">
+        <!-- Canvases will be injected here -->
+    </main>
+
+    <script>
+        // Global animation state
+        let animationFrameId;
+        const CANVAS_SIZE = 250;
+        const PADDING = 20;
+        const RADIUS = (CANVAS_SIZE - PADDING * 2) / 2;
+        const CENTER = CANVAS_SIZE / 2;
+
+        // Helper: Parse the input string (e.g., "1-10, 12, 15-20")
+        function parseRange(input) {
+            const result = new Set();
+            const parts = input.split(',');
+
+            parts.forEach(part => {
+                const range = part.trim().split('-');
+                if (range.length === 2) {
+                    const start = parseInt(range[0]);
+                    const end = parseInt(range[1]);
+                    if (!isNaN(start) && !isNaN(end)) {
+                        for (let i = Math.min(start, end); i <= Math.max(start, end); i++) {
+                            result.add(i);
+                        }
+                    }
+                } else {
+                    const num = parseInt(part);
+                    if (!isNaN(num)) result.add(num);
+                }
+            });
+            return Array.from(result).filter(n => n > 0).sort((a, b) => a - b);
+        }
+
+        // Helper: Generate Pisano Period Sequence
+        function getPisanoSequence(n1, n2, m) {
+            if (m === 1) return [0];
+
+            let seq = [n1 % m, n2 % m];
+            const MAX_LEN = 5000;
+
+            while (true) {
+                let next = (seq[seq.length - 1] + seq[seq.length - 2]) % m;
+
+                // Check for cycle start (n1, n2)
+                if (next === (n2 % m) && seq[seq.length - 1] === (n1 % m)) {
+                    seq.pop();
+                    break;
+                }
+                seq.push(next);
+                if (seq.length > MAX_LEN) break;
+            }
+            return seq;
+        }
+
+        // Helper: Draw a single line between two values on a circle
+        function drawLine(ctx, m, val1, val2, radius, center, color = 'black', width = 1.5) {
+            const angle1 = (Math.PI * 2 * val1) / m - Math.PI / 2;
+            const x1 = center + radius * Math.cos(angle1);
+            const y1 = center + radius * Math.sin(angle1);
+
+            const angle2 = (Math.PI * 2 * val2) / m - Math.PI / 2;
+            const x2 = center + radius * Math.cos(angle2);
+            const y2 = center + radius * Math.sin(angle2);
+
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.stroke();
+        }
+
+        // Draw static pattern on the button
+        function drawButtonIcon() {
+            const canvas = document.getElementById('btnCanvas');
+            const ctx = canvas.getContext('2d');
+            const m = 10; // Use mod 10 for the icon as it looks nice
+            const seq = getPisanoSequence(0, 1, m);
+            const r = 22; // small radius
+            const c = 25; // center
+
+            ctx.clearRect(0,0,50,50);
+
+            // Draw lines in yellow
+            for(let i = 0; i < seq.length; i++) {
+                const startVal = seq[i];
+                const endVal = seq[(i + 1) % seq.length];
+                drawLine(ctx, m, startVal, endVal, r, c, '#fde047', 1);
+            }
+
+            // Circle border
+            ctx.beginPath();
+            ctx.arc(c, c, r, 0, Math.PI * 2);
+            ctx.strokeStyle = '#fde047';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        // Initialize the visualization
+        function initVisualization() {
+            // Stop previous animation
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+            const grid = document.getElementById('gridContainer');
+            grid.innerHTML = '';
+
+            const start1 = parseInt(document.getElementById('start1').value) || 0;
+            const start2 = parseInt(document.getElementById('start2').value) || 1;
+            const modString = document.getElementById('modList').value;
+            const moduli = parseRange(modString);
+
+            if (moduli.length === 0) {
+                grid.innerHTML = '<p class="text-xl font-bold">Please enter valid modular systems.</p>';
+                return;
+            }
+
+            // Create data objects for animation
+            const systems = moduli.map(m => {
+                const seq = getPisanoSequence(start1, start2, m);
+
+                const card = document.createElement('div');
+                card.className = 'flex flex-col items-center';
+
+                const title = document.createElement('h3');
+                title.className = 'text-2xl font-bold mb-2';
+                title.innerText = m;
+                card.appendChild(title);
+
+                const canvas = document.createElement('canvas');
+                canvas.width = CANVAS_SIZE;
+                canvas.height = CANVAS_SIZE;
+                canvas.className = 'bg-transparent';
+                card.appendChild(canvas);
+
+                grid.appendChild(card);
+
+                return {
+                    m: m,
+                    seq: seq,
+                    ctx: canvas.getContext('2d'),
+                    canvas: canvas,
+                    currentIndex: 0,
+                    lastDrawTime: 0, // for timing
+                    startTime: null  // will set when animation starts
+                };
+            });
+
+            // Draw initial circles
+            systems.forEach(sys => {
+                const ctx = sys.ctx;
+                ctx.beginPath();
+                ctx.arc(CENTER, CENTER, RADIUS, 0, Math.PI * 2);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#000';
+                ctx.stroke();
+            });
+
+            // Animation Loop - Time Based (3 seconds duration)
+            const TARGET_DURATION = 3000; // 3 seconds
+
+            function animate(timestamp) {
+                let active = false;
+
+                systems.forEach(sys => {
+                    const { ctx, seq, m } = sys;
+
+                    if (sys.startTime === null) sys.startTime = timestamp;
+
+                    // Calculate how many lines should be drawn by now based on time
+                    const elapsed = timestamp - sys.startTime;
+                    const progress = Math.min(elapsed / TARGET_DURATION, 1); // 0 to 1
+
+                    // The target index is the number of lines that should be visible
+                    const targetIndex = Math.floor(progress * seq.length);
+
+                    // Draw lines until we catch up to targetIndex
+                    if (sys.currentIndex < targetIndex && sys.currentIndex < seq.length) {
+                        active = true;
+
+                        // We loop here to "catch up" if the frame rate dropped or if logic requires multiple lines per frame
+                        // But since we want it smooth, the browser loop usually handles it.
+                        // If seq is HUGE, this ensures it finishes in 3s even if it needs to draw 100 lines per frame.
+                        while (sys.currentIndex < targetIndex && sys.currentIndex < seq.length) {
+                            const startVal = seq[sys.currentIndex];
+                            const endVal = seq[(sys.currentIndex + 1) % seq.length];
+                            drawLine(ctx, m, startVal, endVal, RADIUS, CENTER);
+                            sys.currentIndex++;
+                        }
+                    } else if (sys.currentIndex < seq.length) {
+                        // Keep animation active if we haven't finished, even if we are waiting for the next time slot
+                        active = true;
+                    }
+                });
+
+                if (active) {
+                    animationFrameId = requestAnimationFrame(animate);
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // Run on load
+        window.onload = function() {
+            drawButtonIcon();
+            initVisualization();
+        };
+
+    </script>
+</body>
+</html>
