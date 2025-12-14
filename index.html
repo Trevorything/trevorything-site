@@ -3,194 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trevorything.ai - AI Art Gallery</title>
+    <title>Trevorything.ai</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* Custom styles for the carousel */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #111827; /* Dark background */
             color: #f3f4f6; /* Light text */
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            margin: 0;
+            padding: 0;
         }
-        .carousel-container {
-            overflow: hidden; /* Hide overflowing images */
-            position: relative;
-            width: 100%;
-            margin-bottom: 2rem; /* Space between carousels */
-            border-radius: 0.5rem; /* Rounded corners for container */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15); /* Soft shadow */
-        }
-        .carousel-track {
+
+        /* Preview Tab Animation */
+        .preview-tab {
+            position: absolute;
+            transition: all 0.5s ease-in-out;
+            cursor: pointer;
+            overflow: hidden;
             display: flex;
-            transition: transform 0.5s ease-in-out; /* Smooth sliding animation */
-            will-change: transform; /* Optimize animation performance */
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            z-index: 10;
         }
-        .carousel-slide {
-            min-width: 100%; /* Each slide takes full width */
-            box-sizing: border-box;
+
+        .preview-tab:hover {
+            z-index: 20;
+            transform: scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
         }
-        .carousel-slide img {
+
+        /* Active/Playing State */
+        .preview-tab.active-tab {
+            z-index: 30;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        /* Iframe styling for previews */
+        .preview-frame {
             width: 100%;
-            height: auto; /* Maintain aspect ratio */
-            display: block;
-            object-fit: cover; /* Cover the slide area */
-            max-height: 60vh; /* Limit image height */
-            border-radius: 0.5rem; /* Rounded corners for images */
+            height: 100%;
+            border: none;
+            pointer-events: none; /* Let clicks pass through to the tab container */
+            transform: scale(0.5); /* Initial zoomed out look */
+            transform-origin: center center;
+            transition: transform 0.5s ease-in-out;
+            opacity: 0.6;
         }
-        /* Add subtle fade effect to edges (optional) */
-        .carousel-container::before,
-        .carousel-container::after {
-            content: '';
+
+        .preview-tab:hover .preview-frame,
+        .preview-tab.active-tab .preview-frame {
+            transform: scale(0.75); /* Zoom in a bit on hover/active */
+            opacity: 1;
+        }
+
+        /* Overlay for title and CTA */
+        .tab-overlay {
             position: absolute;
             top: 0;
-            bottom: 0;
-            width: 50px; /* Width of the fade */
-            z-index: 1;
-            pointer-events: none; /* Allow clicks through */
-        }
-        .carousel-container::before {
             left: 0;
-            background: linear-gradient(to right, rgba(17, 24, 39, 0.7), transparent);
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-col;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+            pointer-events: none;
         }
-        .carousel-container::after {
-            right: 0;
-            background: linear-gradient(to left, rgba(17, 24, 39, 0.7), transparent);
+
+        .preview-tab:hover .tab-overlay,
+        .preview-tab.active-tab .tab-overlay {
+            background: rgba(0, 0, 0, 0.1);
         }
+
+        .tab-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 0.5rem;
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        .tab-desc {
+            font-size: 1rem;
+            color: #e5e7eb;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            text-align: center;
+            max-width: 80%;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .preview-tab:hover .tab-desc,
+        .preview-tab.active-tab .tab-desc {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100">
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
 
-    <header class="py-4 px-4 md:px-8 bg-gray-800 shadow-md rounded-b-lg mb-8 flex flex-col md:flex-row justify-between items-center">
+    <header class="py-4 px-4 md:px-8 bg-gray-800 shadow-md rounded-b-lg mb-8 flex flex-col md:flex-row justify-between items-center z-50 relative">
         <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 pb-1 mb-4 md:mb-0 md:mr-4">
             Trevorything.ai
         </h1>
         <nav class="flex space-x-4">
              <a href="Sum Sequence Path/index.html" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out shadow hover:shadow-md">
-                 Sum Sequence Path
+                 Pisano Paths
              </a>
              <a href="Sum Sequence Matrix/index.html" class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out shadow hover:shadow-md">
-                 Sum Sequence Matrix
+                 Modulo Matrix
              </a>
              <a href="Pisano Webs/index.html" class="bg-[#FEFF00] hover:bg-yellow-300 text-black font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out shadow hover:shadow-md">
-                 Pisano Webs
+                 Yatsko's Webs
              </a>
         </nav>
     </header>
 
-    <main class="container mx-auto px-4 py-8">
+    <main class="flex-grow relative w-full h-[80vh] overflow-hidden flex flex-col justify-center items-center">
 
-        <h2 class="text-3xl font-semibold mb-6 text-center text-gray-200">AI Art Gallery Showcase</h2>
-
-        <div id="carousel1" class="carousel-container">
-            <div class="carousel-track">
+        <!-- Tab 1: Pisano Paths (Left) -->
+        <div class="preview-tab" id="tab1" onclick="window.location.href='Sum Sequence Path/index.html'"
+             style="top: 5%; left: -5%; width: 60%; height: 35%; background-color: #1f2937; transform: skewX(-10deg);">
+            <div style="transform: skewX(10deg); width: 100%; height: 100%; position: relative;">
+                <iframe src="Sum Sequence Path/index.html" class="preview-frame" scrolling="no"></iframe>
+                <div class="tab-overlay">
+                    <h2 class="tab-title">Pisano Paths</h2>
+                    <p class="tab-desc">Explore the paths of sum sequences.</p>
                 </div>
+            </div>
         </div>
 
-        <div id="carousel2" class="carousel-container">
-            <div class="carousel-track">
+        <!-- Tab 2: Modulo Matrix (Right) -->
+        <div class="preview-tab" id="tab2" onclick="window.location.href='Sum Sequence Matrix/index.html'"
+             style="top: 35%; right: -5%; width: 60%; height: 35%; background-color: #374151; transform: skewX(10deg);">
+            <div style="transform: skewX(-10deg); width: 100%; height: 100%; position: relative;">
+                 <iframe src="Sum Sequence Matrix/index.html" class="preview-frame" scrolling="no"></iframe>
+                 <div class="tab-overlay">
+                    <h2 class="tab-title">Modulo Matrix</h2>
+                    <p class="tab-desc">Visualize sequences in a matrix grid.</p>
                 </div>
+            </div>
         </div>
 
-        <div id="carousel3" class="carousel-container">
-            <div class="carousel-track">
+        <!-- Tab 3: Yatsko's Webs (Left) -->
+        <div class="preview-tab" id="tab3" onclick="window.location.href='Pisano Webs/index.html'"
+             style="top: 65%; left: -5%; width: 60%; height: 35%; background-color: #4b5563; transform: skewX(-10deg);">
+            <div style="transform: skewX(10deg); width: 100%; height: 100%; position: relative;">
+                <iframe src="Pisano Webs/index.html" class="preview-frame" scrolling="no"></iframe>
+                <div class="tab-overlay">
+                    <h2 class="tab-title">Yatsko's Webs</h2>
+                    <p class="tab-desc">Beautiful circular visualizations of Pisano periods.</p>
                 </div>
+            </div>
         </div>
 
     </main>
 
-    <footer class="mt-12 py-6 px-4 text-center text-gray-400 border-t border-gray-700">
+    <footer class="mt-4 py-6 px-4 text-center text-gray-400 border-t border-gray-700 bg-gray-800 z-50">
         <p>&copy; <span id="currentYear"></span> Trevorything.ai. All rights reserved.</p>
     </footer>
 
     <script>
-        // --- Configuration ---
-        const baseImageFolder = 'AI Art Gallery'; // Base folder path relative to index.html
-        const imageNames = ['A.jpg', 'B.jpg', 'C.jpg']; // Standard image names in each subfolder
-        const carouselSpeed = 4000; // Time in milliseconds between slides
-
-        // --- Helper Function to Generate Image Paths ---
-        /**
-         * Generates an array of image paths for a specific carousel.
-         * @param {number} carouselNumber - The number corresponding to the subfolder (e.g., 1, 2, 3).
-         * @returns {string[]} An array of image paths.
-         */
-        function generateImagePaths(carouselNumber) {
-            const paths = [];
-            const folderPath = `${baseImageFolder}/${carouselNumber}`; // e.g., "AI Art Gallery/1"
-            imageNames.forEach(imageName => {
-                paths.push(`${folderPath}/${imageName}`); // e.g., "AI Art Gallery/1/A.jpg"
-            });
-            return paths;
-        }
-
-        // --- Carousel Logic (Handles DOM manipulation and animation) ---
-        function setupCarousel(carouselId, images, speedOffset = 0) {
-            const carouselElement = document.getElementById(carouselId);
-            if (!carouselElement) {
-                console.error(`Carousel element with ID "${carouselId}" not found.`);
-                return;
-            }
-            const track = carouselElement.querySelector('.carousel-track');
-            if (!track) {
-                console.error(`Carousel track not found within ID "${carouselId}".`);
-                return;
-            }
-
-            track.innerHTML = ''; // Clear any existing slides (e.g., placeholders)
-            images.forEach(src => {
-                const slide = document.createElement('div');
-                slide.classList.add('carousel-slide');
-                const img = document.createElement('img');
-                img.src = src;
-                // Basic error handling for missing images
-                img.onerror = function() {
-                    console.error(`Failed to load image: ${src}`);
-                    this.alt = 'Image not found';
-                    // Optional: Display a placeholder on error
-                    this.src = 'https://placehold.co/1200x600/ef4444/white?text=Error+Loading';
-                };
-                img.alt = `AI Generated Art (${carouselId})`; // Add descriptive alt text
-                img.loading = 'lazy'; // Improve performance by lazy loading images
-                slide.appendChild(img);
-                track.appendChild(slide);
-            });
-
-            let currentIndex = 0;
-            const slides = track.querySelectorAll('.carousel-slide');
-            const totalSlides = slides.length;
-            if (totalSlides <= 1) return; // No need to animate if 0 or 1 slide
-
-            function nextSlide() {
-                currentIndex = (currentIndex + 1) % totalSlides;
-                updateCarousel();
-            }
-
-            function updateCarousel() {
-                const offset = -currentIndex * 100;
-                track.style.transform = `translateX(${offset}%)`;
-            }
-
-            // Use setTimeout for the initial offset, then setInterval for continuous sliding
-            setTimeout(() => {
-                 setInterval(nextSlide, carouselSpeed);
-                 updateCarousel(); // Set initial position
-            }, speedOffset); // Apply the initial delay offset
-        }
-
-        // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Generate the image paths for each carousel
-            const carousel1Paths = generateImagePaths(1);
-            const carousel2Paths = generateImagePaths(2);
-            const carousel3Paths = generateImagePaths(3);
+            const tabs = document.querySelectorAll('.preview-tab');
+            let currentActive = 0;
+            const cycleInterval = 4000; // Change active tab every 4 seconds
+            let intervalId;
 
-            // Setup each carousel with its specific images and optional staggered start time
-            setupCarousel('carousel1', carousel1Paths, 0);       // Starts immediately
-            setupCarousel('carousel2', carousel2Paths, 500);     // Starts 0.5s later
-            setupCarousel('carousel3', carousel3Paths, 1000);    // Starts 1s later
+            function setActiveTab(index) {
+                tabs.forEach((tab, i) => {
+                    if (i === index) {
+                        tab.classList.add('active-tab');
+                        // Bring to front slightly
+                        tab.style.zIndex = '30';
+                    } else {
+                        tab.classList.remove('active-tab');
+                        tab.style.zIndex = '10';
+                    }
+                });
+            }
+
+            // Initial Active
+            setActiveTab(currentActive);
+
+            // Auto-play animation (cycling active state)
+            function startCycle() {
+                intervalId = setInterval(() => {
+                    currentActive = (currentActive + 1) % tabs.length;
+                    setActiveTab(currentActive);
+                }, cycleInterval);
+            }
+
+            function stopCycle() {
+                clearInterval(intervalId);
+            }
+
+            startCycle();
+
+            // Hover interactions
+            tabs.forEach((tab, index) => {
+                tab.addEventListener('mouseenter', () => {
+                    stopCycle();
+                    setActiveTab(index);
+                    currentActive = index;
+                });
+
+                tab.addEventListener('mouseleave', () => {
+                   startCycle();
+                });
+            });
 
             // Update footer year
             const currentYearElement = document.getElementById('currentYear');
