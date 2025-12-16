@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulo Matrix Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #111827; /* bg-gray-900 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #gridContainer {
+            display: grid;
+            gap: 1px;
+            padding: 4px;
+            background-color: #374151; /* bg-gray-700 */
+            border-radius: 4px;
+            transition: opacity 0.5s ease;
+        }
+
+        .grid-cell {
+            width: 100%;
+            height: 100%;
+            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .highlight-sequence {
+            box-shadow: inset 0 0 0 2px #FFBF00;
+            z-index: 10;
+            transform: scale(1.1);
+        }
+
+        #info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-family: sans-serif;
+            font-size: 12px;
+            pointer-events: none;
+            background: rgba(0,0,0,0.5);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div id="gridContainer"></div>
+    <div id="info">Loading...</div>
+
+    <script>
+        const gridContainer = document.getElementById('gridContainer');
+        const info = document.getElementById('info');
+
+        let sequences = [];
+        let cellElements = new Map(); // "row,col" -> element
+        let cellInfo = new Map(); // "row,col" -> { sequenceIndex, color }
+        let currentModulus = 0;
+        let animationInterval;
+        let highlightTimeout;
+
+        function generateGrid(n) {
+            currentModulus = n;
+            gridContainer.innerHTML = '';
+            sequences = [];
+            cellElements.clear();
+            cellInfo.clear();
+
+            // Calculate best cell size to fit screen
+            const availableSize = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+            const cellSize = Math.floor(availableSize / n) - 1; // -1 for gap
+
+            gridContainer.style.gridTemplateColumns = `repeat(${n}, ${cellSize}px)`;
+            gridContainer.style.gridTemplateRows = `repeat(${n}, ${cellSize}px)`;
+
+            const visited = new Set();
+            let sequenceIndex = 0;
+
+            // Find sequences
+            for (let startRow = 0; startRow < n; startRow++) {
+                for (let startCol = 0; startCol < n; startCol++) {
+                    const startPairStr = `${startRow},${startCol}`;
+                    if (!visited.has(startPairStr)) {
+                        const currentSequence = [];
+                        let currentRow = startRow;
+                        let currentCol = startCol;
+                        let currentPairStr = `${currentRow},${currentCol}`;
+                        while (!visited.has(currentPairStr)) {
+                            visited.add(currentPairStr);
+                            currentSequence.push([currentRow, currentCol]);
+                            const nextRow = currentCol;
+                            const nextCol = (currentRow + currentCol) % n;
+                            currentRow = nextRow;
+                            currentCol = nextCol;
+                            currentPairStr = `${currentRow},${currentCol}`;
+                        }
+                        sequences.push(currentSequence);
+                        sequenceIndex++;
+                    }
+                }
+            }
+
+            // Colors
+            const numSequences = sequences.length;
+            if (numSequences > 0) {
+                const sequenceInfoData = sequences.map((seq, index) => ({ index, length: seq.length }));
+                sequenceInfoData.sort((a, b) => b.length - a.length || a.index - b.index);
+
+                const startH = 177, startS = 38, startL = 20;
+                const endH = 210, endS = 5, endL = 65;
+                const deltaH = endH - startH; const deltaS = endS - startS; const deltaL = endL - startL;
+                const steps = numSequences > 1 ? numSequences - 1 : 1;
+                const stepH = deltaH / steps; const stepS = deltaS / steps; const stepL = deltaL / steps;
+
+                sequenceInfoData.forEach((info, rank) => {
+                    const originalIndex = info.index;
+                    const sequence = sequences[originalIndex];
+                    let color;
+                    if (numSequences === 1) { color = 'hsl(220, 10%, 40%)'; }
+                    else {
+                        const H = startH + rank * stepH;
+                        const S = Math.max(0, Math.min(100, startS + rank * stepS));
+                        const L = Math.max(0, Math.min(100, startL + rank * stepL));
+                        const finalH = (H % 360 + 360) % 360;
+                        color = `hsl(${finalH}, ${S}%, ${L}%)`;
+                    }
+                    sequence.forEach(pair => {
+                        const pairStr = `${pair[0]},${pair[1]}`;
+                        cellInfo.set(pairStr, { sequenceIndex: originalIndex, color: color });
+                    });
+                });
+            }
+
+            // Draw grid
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    const pairStr = `${i},${j}`;
+                    const infoData = cellInfo.get(pairStr);
+                    cellElements.set(pairStr, cell);
+                    if (infoData) {
+                        cell.style.backgroundColor = infoData.color;
+                    }
+                    gridContainer.appendChild(cell);
+                }
+            }
+
+            info.textContent = `Modulus: ${n}`;
+        }
+
+        function highlightSequence(index) {
+            // Remove previous
+            document.querySelectorAll('.highlight-sequence').forEach(el => {
+                el.classList.remove('highlight-sequence');
+                // el.style.backgroundColor = ''; // relying on class removal, but we modified bg color in main app.
+                // In main app we stored original color. Here we just add/remove class with box-shadow.
+                // But we also want to change bg color to amber?
+                // The main app: cellElement.style.backgroundColor = '#FFBF00';
+                // We should replicate that or just use the box-shadow class if it's visible enough.
+                // Let's reset bg color
+                const row = el.dataset.r;
+                const col = el.dataset.c; // Oops didn't set dataset
+            });
+
+            // We need to restore original colors.
+            // Let's just iterate all cells and reset their colors from cellInfo
+            cellElements.forEach((cell, key) => {
+                const infoData = cellInfo.get(key);
+                if (infoData) cell.style.backgroundColor = infoData.color;
+                cell.classList.remove('highlight-sequence');
+            });
+
+            if (index === null || index >= sequences.length) return;
+
+            const sequence = sequences[index];
+            sequence.forEach(pair => {
+                const pairStr = `${pair[0]},${pair[1]}`;
+                const cell = cellElements.get(pairStr);
+                if (cell) {
+                    cell.style.backgroundColor = '#FFBF00';
+                    cell.classList.add('highlight-sequence');
+                }
+            });
+        }
+
+        function runCycle() {
+            // Pick a random modulus between 5 and 25
+            const n = Math.floor(Math.random() * 20) + 5;
+            generateGrid(n);
+
+            // Highlight a few sequences randomly
+            let count = 0;
+            const maxHighlights = 5;
+
+            function nextHighlight() {
+                if (count >= maxHighlights) {
+                    // Start new grid cycle
+                    highlightTimeout = setTimeout(runCycle, 1000);
+                    return;
+                }
+
+                const randomSeqIndex = Math.floor(Math.random() * sequences.length);
+                highlightSequence(randomSeqIndex);
+
+                count++;
+                highlightTimeout = setTimeout(nextHighlight, 800);
+            }
+
+            highlightTimeout = setTimeout(nextHighlight, 500);
+        }
+
+        window.addEventListener('resize', () => {
+             // Simple reload or re-generate with current modulus to fix size
+             if(currentModulus) generateGrid(currentModulus);
+        });
+
+        runCycle();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pisano Paths Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #374151; /* Match the canvas background from the main tool */
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        #info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-family: sans-serif;
+            font-size: 12px;
+            pointer-events: none;
+            background: rgba(0,0,0,0.5);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="previewCanvas"></canvas>
+    <div id="info">Loading...</div>
+
+    <script>
+        const canvas = document.getElementById('previewCanvas');
+        const ctx = canvas.getContext('2d');
+        const info = document.getElementById('info');
+
+        // Logic from original index.html
+        const SEQUENCE_LENGTH = 2000; // Reduced length for performance in preview
+
+        function generateSequence(x1, x2, mod) {
+            const length = SEQUENCE_LENGTH;
+            const seq = [x1, x2];
+            if (length < 2) return seq.slice(0, length);
+            for (let i = 2; i < length; i++) {
+                const nextVal = (BigInt(seq[i - 1]) + BigInt(seq[i - 2])) % BigInt(mod);
+                seq.push(Number(nextVal));
+            }
+            return seq;
+        }
+
+        function calculatePathCoords(sequence, mod, sides) {
+            let x = 0, y = 0;
+            const xCoords = [x], yCoords = [y];
+            if (sides < 1) sides = 1;
+            const angleIncrementRad = (2 * Math.PI) / sides;
+            sequence.forEach((value, i) => {
+                const distance = (value === 0) ? mod : value;
+                const currentAngleRad = i * angleIncrementRad;
+                const dx = Math.cos(currentAngleRad);
+                const dy = Math.sin(currentAngleRad);
+                x += dx * distance;
+                y += dy * distance;
+                xCoords.push(x);
+                yCoords.push(y);
+            });
+            return { xCoords, yCoords };
+        }
+
+        function drawPath(context, xCoords, yCoords) {
+            const width = context.canvas.width;
+            const height = context.canvas.height;
+            context.fillStyle = '#374151';
+            context.fillRect(0, 0, width, height);
+
+            if (xCoords.length < 2) return;
+            let minX = xCoords[0], maxX = xCoords[0], minY = yCoords[0], maxY = yCoords[0];
+            for (let i = 1; i < xCoords.length; i++) {
+                minX = Math.min(minX, xCoords[i]);
+                maxX = Math.max(maxX, xCoords[i]);
+                minY = Math.min(minY, yCoords[i]);
+                maxY = Math.max(maxY, yCoords[i]);
+            }
+            const pathWidth = maxX - minX;
+            const pathHeight = maxY - minY;
+            if (pathWidth === 0 && pathHeight === 0) return;
+
+            const padding = 20;
+            const effectiveCanvasWidth = width - 2 * padding;
+            const effectiveCanvasHeight = height - 2 * padding;
+            const scaleX = pathWidth === 0 ? 1 : effectiveCanvasWidth / pathWidth;
+            const scaleY = pathHeight === 0 ? 1 : effectiveCanvasHeight / pathHeight;
+            const scale = Math.min(scaleX, scaleY) * 0.95;
+            const centerX = (minX + maxX) / 2;
+            const centerY = (minY + maxY) / 2;
+            const translateX = width / 2 - centerX * scale;
+            const translateY = height / 2 - centerY * scale;
+            const transformedX = xCoords.map(x => translateX + x * scale);
+            const transformedY = yCoords.map(y => translateY + y * scale);
+
+            // Draw Shaded Area
+            context.beginPath();
+            context.moveTo(transformedX[0], transformedY[0]);
+            for (let i = 1; i < transformedX.length; i++) {
+                context.lineTo(transformedX[i], transformedY[i]);
+            }
+            context.fillStyle = 'rgba(209, 213, 219, 0.2)';
+            context.fill();
+
+            // Draw Gradient Lines
+            context.lineWidth = 3;
+            context.lineCap = 'round';
+            context.lineJoin = 'round';
+            for (let i = 0; i < transformedX.length - 1; i++) {
+                 const x1 = transformedX[i];
+                 const y1 = transformedY[i];
+                 const x2 = transformedX[i+1];
+                 const y2 = transformedY[i+1];
+                 const deltaX = x2 - x1;
+                 const deltaY = y2 - y1;
+                 const segmentAngleRad = Math.atan2(deltaY, deltaX);
+                 const hue = (segmentAngleRad * 180 / Math.PI + 180) % 360;
+                 context.strokeStyle = `hsl(${hue}, 100%, 65%)`;
+                 context.beginPath();
+                 context.moveTo(x1, y1);
+                 context.lineTo(x2, y2);
+                 context.stroke();
+             }
+        }
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            // Redraw current if exists, but loop will handle it
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function randomizeAndDraw() {
+            // Random parameters
+            const mod = Math.floor(Math.random() * 100) + 10; // 10 to 109
+            const x1 = Math.floor(Math.random() * 10);
+            const x2 = Math.floor(Math.random() * 10);
+            const sides = Math.floor(Math.random() * 6) + 3; // 3 to 8
+
+            info.textContent = `Mod: ${mod}, Start: (${x1},${x2}), Sides: ${sides}`;
+
+            const sequence = generateSequence(x1, x2, mod);
+            const { xCoords, yCoords } = calculatePathCoords(sequence, mod, sides);
+            drawPath(ctx, xCoords, yCoords);
+        }
+
+        randomizeAndDraw();
+        setInterval(randomizeAndDraw, 3000); // Change every 3 seconds
+
+    </script>
+</body>
+</html>
