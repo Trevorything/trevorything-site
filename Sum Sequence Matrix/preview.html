@@ -4,27 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modulo Matrix Preview</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         body, html {
-            margin: 0;
-            padding: 0;
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #111827; /* bg-gray-900 */
+            background-color: #0f4040; /* --mid-dark */
             display: flex;
             align-items: center;
             justify-content: center;
+            font-family: sans-serif;
         }
 
         #gridContainer {
             display: grid;
             gap: 1px;
             padding: 4px;
-            background-color: #374151; /* bg-gray-700 */
-            border-radius: 4px;
+            background-color: #0a2e2e; /* --dark */
+            border-radius: 6px;
             transition: opacity 0.5s ease;
+            box-shadow: 0 6px 32px rgba(0,0,0,0.35);
         }
 
         .grid-cell {
@@ -38,28 +39,13 @@
             z-index: 10;
             transform: scale(1.1);
         }
-
-        #info {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            color: rgba(255, 255, 255, 0.7);
-            font-family: sans-serif;
-            font-size: 12px;
-            pointer-events: none;
-            background: rgba(0,0,0,0.5);
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
     </style>
 </head>
 <body>
     <div id="gridContainer"></div>
-    <div id="info">Loading...</div>
 
     <script>
         const gridContainer = document.getElementById('gridContainer');
-        const info = document.getElementById('info');
 
         let sequences = [];
         let cellElements = new Map(); // "row,col" -> element
@@ -109,14 +95,14 @@
                 }
             }
 
-            // Colors
+            // Colors — teal-based gradient
             const numSequences = sequences.length;
             if (numSequences > 0) {
                 const sequenceInfoData = sequences.map((seq, index) => ({ index, length: seq.length }));
                 sequenceInfoData.sort((a, b) => b.length - a.length || a.index - b.index);
 
-                const startH = 177, startS = 38, startL = 20;
-                const endH = 210, endS = 5, endL = 65;
+                const startH = 175, startS = 45, startL = 12;
+                const endH = 175, endS = 25, endL = 55;
                 const deltaH = endH - startH; const deltaS = endS - startS; const deltaL = endL - startL;
                 const steps = numSequences > 1 ? numSequences - 1 : 1;
                 const stepH = deltaH / steps; const stepS = deltaS / steps; const stepL = deltaL / steps;
@@ -125,7 +111,7 @@
                     const originalIndex = info.index;
                     const sequence = sequences[originalIndex];
                     let color;
-                    if (numSequences === 1) { color = 'hsl(220, 10%, 40%)'; }
+                    if (numSequences === 1) { color = 'hsl(175, 30%, 32%)'; }
                     else {
                         const H = startH + rank * stepH;
                         const S = Math.max(0, Math.min(100, startS + rank * stepS));
@@ -154,26 +140,10 @@
                     gridContainer.appendChild(cell);
                 }
             }
-
-            info.textContent = `Modulus: ${n}`;
         }
 
         function highlightSequence(index) {
-            // Remove previous
-            document.querySelectorAll('.highlight-sequence').forEach(el => {
-                el.classList.remove('highlight-sequence');
-                // el.style.backgroundColor = ''; // relying on class removal, but we modified bg color in main app.
-                // In main app we stored original color. Here we just add/remove class with box-shadow.
-                // But we also want to change bg color to amber?
-                // The main app: cellElement.style.backgroundColor = '#FFBF00';
-                // We should replicate that or just use the box-shadow class if it's visible enough.
-                // Let's reset bg color
-                const row = el.dataset.r;
-                const col = el.dataset.c; // Oops didn't set dataset
-            });
-
-            // We need to restore original colors.
-            // Let's just iterate all cells and reset their colors from cellInfo
+            // Restore all cells to original color
             cellElements.forEach((cell, key) => {
                 const infoData = cellInfo.get(key);
                 if (infoData) cell.style.backgroundColor = infoData.color;
@@ -220,7 +190,7 @@
         }
 
         window.addEventListener('resize', () => {
-             // Simple reload or re-generate with current modulus to fix size
+             // Re-generate with current modulus to fix size
              if(currentModulus) generateGrid(currentModulus);
         });
 

@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pisano Webs Preview</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Pisano Webs Preview | Trevorything.ai</title>
     <style>
-        body, html {
+        *, *::before, *::after {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+        body, html {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #FEFF00; /* Yellow background */
+            background-color: #5ec2c2;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -20,28 +22,17 @@
         canvas {
             display: block;
         }
-        #info {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            color: rgba(0, 0, 0, 0.7);
-            font-family: sans-serif;
-            font-size: 12px;
-            pointer-events: none;
-            background: rgba(255, 255, 255, 0.5);
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
     </style>
 </head>
 <body>
     <canvas id="previewCanvas"></canvas>
-    <div id="info">Loading...</div>
 
     <script>
         const canvas = document.getElementById('previewCanvas');
         const ctx = canvas.getContext('2d');
-        const info = document.getElementById('info');
+
+        const LINE_COLOR = '#041c1c';
+        const CIRCLE_COLOR = '#0a2e2e';
 
         let animationFrameId;
 
@@ -78,14 +69,11 @@
         function runAnimation(m, n1, n2) {
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
 
-            // Set canvas size
             const size = Math.min(window.innerWidth, window.innerHeight) * 0.9;
             canvas.width = size;
             canvas.height = size;
             const center = size / 2;
             const radius = size / 2 - 10;
-
-            info.textContent = `Mod: ${m}, Start: (${n1},${n2})`;
 
             const seq = getPisanoSequence(n1, n2, m);
 
@@ -95,12 +83,13 @@
             ctx.beginPath();
             ctx.arc(center, center, radius, 0, Math.PI * 2);
             ctx.lineWidth = 2;
-            ctx.strokeStyle = '#000';
+            ctx.strokeStyle = CIRCLE_COLOR;
             ctx.stroke();
 
+            ctx.strokeStyle = LINE_COLOR;
             ctx.lineWidth = 1.5;
 
-            const TARGET_DURATION = 2000; // 2 seconds to draw
+            const TARGET_DURATION = 2000;
             let startTime = null;
             let currentIndex = 0;
 
@@ -122,7 +111,6 @@
                 if (currentIndex < seq.length) {
                     animationFrameId = requestAnimationFrame(animate);
                 } else {
-                    // Wait a bit then restart
                     setTimeout(randomizeAndRun, 1000);
                 }
             }
@@ -137,13 +125,10 @@
         }
 
         window.addEventListener('resize', () => {
-             // Just let the next cycle handle resize or restart immediately?
-             // Restarting immediately provides better UX
-             randomizeAndRun();
+            randomizeAndRun();
         });
 
         randomizeAndRun();
-
     </script>
 </body>
 </html>

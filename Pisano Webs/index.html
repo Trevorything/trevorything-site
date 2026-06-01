@@ -3,111 +3,480 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pisano Period Visualization</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Yatsko's Webs — Pisano Period Visualizer | Trevorything.ai</title>
+    <meta name="description" content="Interactive Pisano Period web visualizer inspired by Jacob Yatsko. Explore Fibonacci sequence modulo patterns as beautiful geometric webs.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        /* ===== Design Tokens ===== */
+        :root {
+            --darkest: #041c1c;
+            --dark: #0a2e2e;
+            --mid-dark: #0f4040;
+            --teal: #1a5c5c;
+            --mid: #267a7a;
+            --mid-light: #3d9e9e;
+            --light: #5ec2c2;
+            --lighter: #8fd8d8;
+            --lightest: #c2eded;
+            --white: #f0fafa;
+        }
+
+        /* ===== Reset & Base ===== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
-            background-color: #FEFF00; /* Updated to specific bright yellow */
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light);
+            color: var(--darkest);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
         }
-        canvas {
-            background-color: transparent;
-        }
-        /* Custom scrollbar */
+
+        /* ===== Scrollbar ===== */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #fde047;
+            background: var(--lighter);
         }
         ::-webkit-scrollbar-thumb {
-            background: #000;
+            background: var(--dark);
             border-radius: 4px;
         }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--darkest);
+        }
+
+        /* ===== Navigation Header ===== */
+        .site-nav {
+            width: 100%;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-back {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        .nav-back:hover {
+            color: var(--darkest);
+            transform: translateX(-2px);
+        }
+        .nav-back svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .nav-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--darkest);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-dots {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .nav-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--dark);
+            opacity: 0.35;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+        .nav-dot:hover {
+            opacity: 0.7;
+            transform: scale(1.3);
+        }
+        .nav-dot.active {
+            opacity: 1;
+            background: var(--darkest);
+            transform: scale(1.2);
+        }
+        .nav-dot-tooltip {
+            position: relative;
+        }
+        .nav-dot-tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--darkest);
+            color: var(--white);
+            font-size: 10px;
+            font-weight: 500;
+            padding: 3px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        .nav-dot-tooltip:hover::after {
+            opacity: 1;
+        }
+
+        /* ===== Subtitle ===== */
+        .subtitle {
+            text-align: center;
+            margin: 8px 24px 24px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--dark);
+            opacity: 0.8;
+        }
+        .subtitle a {
+            color: var(--dark);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            transition: color 0.2s;
+        }
+        .subtitle a:hover {
+            color: var(--darkest);
+        }
+
+        /* ===== Controls Card ===== */
+        .controls-card {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 16px;
+            padding: 28px 32px;
+            margin: 0 24px 32px;
+            width: 100%;
+            max-width: 720px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-end;
+            justify-content: center;
+            box-shadow: 0 8px 32px rgba(4, 28, 28, 0.08);
+            animation: fadeSlideUp 0.5s ease forwards;
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .control-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--dark);
+        }
+
         .control-input {
-            @apply border-2 border-black bg-white px-3 py-2 rounded-none focus:outline-none focus:ring-2 focus:ring-black transition-all;
+            background: #fff;
+            color: var(--darkest);
+            border: 1px solid var(--mid);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
         }
-        /* Button specific styles to center canvas */
-        #animBtn {
-            transition: transform 0.1s;
+        .control-input:focus {
+            border-color: var(--dark);
+            box-shadow: 0 0 0 3px rgba(10, 46, 46, 0.15);
         }
-        #animBtn:active {
+        .control-input::placeholder {
+            color: var(--mid);
+            font-weight: 400;
+        }
+
+        .input-small {
+            width: 88px;
+            text-align: center;
+        }
+
+        .input-wide {
+            width: 100%;
+            min-width: 200px;
+        }
+
+        .control-group-grow {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        /* ===== Run Button ===== */
+        .run-btn-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .run-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--darkest);
+            border: 2px solid transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(4, 28, 28, 0.25);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .run-btn:hover {
+            box-shadow: 0 6px 24px rgba(4, 28, 28, 0.35);
+            transform: scale(1.05);
+        }
+        .run-btn:active {
             transform: scale(0.95);
+        }
+
+        /* ===== Wave Divider ===== */
+        .wave-divider {
+            width: 100%;
+            overflow: hidden;
+            line-height: 0;
+        }
+        .wave-divider svg {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        /* ===== Grid Container ===== */
+        .grid-section {
+            width: 100%;
+            background: var(--mid-light);
+            padding: 48px 24px;
+        }
+
+        .grid-container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 24px;
+        }
+
+        /* ===== Canvas Card ===== */
+        .canvas-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            padding: 16px 16px 20px;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .canvas-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(4, 28, 28, 0.12);
+        }
+
+        .canvas-card-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--darkest);
+            margin-bottom: 8px;
+            letter-spacing: -0.3px;
+        }
+
+        .canvas-card canvas {
+            background: transparent;
+            display: block;
+        }
+
+        /* ===== Wave Divider 2 ===== */
+        .wave-divider-2 {
+            width: 100%;
+            overflow: hidden;
+            line-height: 0;
+            background: var(--mid-light);
+        }
+        .wave-divider-2 svg {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        /* ===== Footer ===== */
+        .site-footer {
+            width: 100%;
+            background: var(--mid);
+            text-align: center;
+            padding: 32px 24px;
+            color: var(--dark);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* ===== Error message ===== */
+        .error-msg {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--darkest);
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 640px) {
+            .nav-title {
+                font-size: 20px;
+            }
+            .controls-card {
+                padding: 20px 16px;
+                gap: 14px;
+            }
+            .control-group-grow {
+                min-width: 100%;
+            }
+            .grid-section {
+                padding: 32px 12px;
+            }
+            .canvas-card {
+                padding: 10px 10px 14px;
+            }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center p-6 text-black">
+<body>
 
-    <header class="w-full py-4 px-4 md:px-8 bg-gray-800 shadow-md rounded-b-lg mb-8 flex flex-col md:flex-row justify-between items-center text-gray-100 font-sans">
-        <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 pb-1 mb-4 md:mb-0 md:mr-4 font-['Inter']">
+    <!-- Navigation -->
+    <nav class="site-nav">
+        <a href="../index.html" class="nav-back">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
             Trevorything.ai
-        </h1>
-        <nav class="flex flex-wrap gap-2 justify-center">
-             <a href="../Sum Sequence Path/index.html" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out shadow hover:shadow-md">
-                 Pisano Paths
-             </a>
-             <a href="../Sum Sequence Matrix/index.html" class="bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out shadow hover:shadow-md">
-                 Modulo Matrix
-             </a>
-             <a href="index.html" class="bg-[#FEFF00] hover:bg-yellow-300 text-black font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out shadow hover:shadow-md">
-                 Yatsko's Webs
-             </a>
-             <a href="../howmanymoons/index.html" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out shadow hover:shadow-md">
-                 How Many Moons
-             </a>
-        </nav>
-    </header>
-
-    <!-- Header & Controls -->
-    <header class="w-full max-w-6xl mb-8 flex flex-col gap-6">
-        <div class="text-center">
-            <h1 class="text-4xl font-bold mb-2 uppercase tracking-tighter">Jacob Yatsko's Pisano Period Webs</h1>
-            <p class="text-sm font-semibold opacity-70">Fibonacci Sequence Modulo M Visualization based on <a href="https://www.youtube.com/watch?v=o1eLKODSCqw" target="_blank" class="underline hover:text-gray-800">Jacob Yatsko's Original Visuals Youtube Video</a></p>
+        </a>
+        <span class="nav-title">Yatsko's Webs</span>
+        <div class="nav-dots">
+            <a href="../Sum Sequence Path/index.html" class="nav-dot nav-dot-tooltip" data-tooltip="Pisano Paths" title="Pisano Paths"></a>
+            <a href="../Sum Sequence Matrix/index.html" class="nav-dot nav-dot-tooltip" data-tooltip="Modulo Matrix" title="Modulo Matrix"></a>
+            <a href="index.html" class="nav-dot active nav-dot-tooltip" data-tooltip="Yatsko's Webs" title="Yatsko's Webs"></a>
+            <a href="../howmanymoons/index.html" class="nav-dot nav-dot-tooltip" data-tooltip="How Many Moons" title="How Many Moons"></a>
         </div>
+    </nav>
 
-        <div class="flex flex-col md:flex-row gap-4 items-center justify-center bg-yellow-400 p-6 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+    <!-- Subtitle -->
+    <p class="subtitle">
+        Fibonacci Sequence Modulo M Visualization based on
+        <a href="https://www.youtube.com/watch?v=o1eLKODSCqw" target="_blank" rel="noopener noreferrer">Jacob Yatsko's Original Visuals</a>
+    </p>
 
-            <div class="flex flex-col gap-1">
-                <label class="text-xs font-bold uppercase tracking-wider">Start Num 1</label>
-                <input type="number" id="start1" value="0" class="control-input w-24 text-center text-lg font-bold">
-            </div>
-
-            <div class="flex flex-col gap-1">
-                <label class="text-xs font-bold uppercase tracking-wider">Start Num 2</label>
-                <input type="number" id="start2" value="1" class="control-input w-24 text-center text-lg font-bold">
-            </div>
-
-            <div class="flex flex-col gap-1 flex-grow w-full md:w-auto">
-                <label class="text-xs font-bold uppercase tracking-wider">Modular Systems</label>
-                <input type="text" id="modList" value="1-30" class="control-input w-full text-lg font-bold" placeholder="1, 2, 3... or 1-30">
-            </div>
-
-            <!-- Pattern Button -->
-            <div class="flex flex-col gap-1 items-center">
-                <label class="text-xs font-bold uppercase tracking-wider">Run</label>
-                <button id="animBtn" onclick="initVisualization()" class="bg-black rounded-full w-16 h-16 flex items-center justify-center border-2 border-transparent hover:bg-gray-800 shadow-lg overflow-hidden" title="Animate">
-                    <canvas id="btnCanvas" width="50" height="50"></canvas>
-                </button>
-            </div>
+    <!-- Controls -->
+    <div class="controls-card">
+        <div class="control-group">
+            <label class="control-label" for="start1">Start Num 1</label>
+            <input type="number" id="start1" value="0" class="control-input input-small">
         </div>
-    </header>
+        <div class="control-group">
+            <label class="control-label" for="start2">Start Num 2</label>
+            <input type="number" id="start2" value="1" class="control-input input-small">
+        </div>
+        <div class="control-group control-group-grow">
+            <label class="control-label" for="modList">Modular Systems</label>
+            <input type="text" id="modList" value="1-30" class="control-input input-wide" placeholder="1, 2, 3… or 1-30">
+        </div>
+        <div class="run-btn-wrapper">
+            <label class="control-label">Run</label>
+            <button id="animBtn" onclick="initVisualization()" class="run-btn" title="Animate">
+                <canvas id="btnCanvas" width="44" height="44"></canvas>
+            </button>
+        </div>
+    </div>
 
-    <!-- Grid Container -->
-    <main id="gridContainer" class="w-full max-w-7xl flex flex-wrap justify-center gap-8 pb-20">
-        <!-- Canvases will be injected here -->
-    </main>
+    <!-- Wave: light → mid-light -->
+    <div class="wave-divider">
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,40 C360,80 720,0 1080,40 C1260,60 1380,20 1440,40 L1440,80 L0,80 Z" fill="#3d9e9e"/>
+        </svg>
+    </div>
+
+    <!-- Grid Section -->
+    <section class="grid-section">
+        <div id="gridContainer" class="grid-container">
+            <!-- Canvases injected by JS -->
+        </div>
+    </section>
+
+    <!-- Wave: mid-light → mid -->
+    <div class="wave-divider-2">
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,20 C240,60 480,0 720,30 C960,60 1200,10 1440,30 L1440,80 L0,80 Z" fill="#267a7a"/>
+        </svg>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        &copy; 2026 Trevorything.ai
+    </footer>
 
     <script>
-        // Global animation state
+        // ===== Global Animation State =====
         let animationFrameId;
         const CANVAS_SIZE = 250;
         const PADDING = 20;
         const RADIUS = (CANVAS_SIZE - PADDING * 2) / 2;
         const CENTER = CANVAS_SIZE / 2;
+
+        // Colors
+        const LINE_COLOR = '#041c1c';
+        const CIRCLE_COLOR = '#0a2e2e';
+        const ICON_COLOR = '#5ec2c2';
 
         // Helper: Parse the input string (e.g., "1-10, 12, 15-20")
         function parseRange(input) {
@@ -154,7 +523,7 @@
         }
 
         // Helper: Draw a single line between two values on a circle
-        function drawLine(ctx, m, val1, val2, radius, center, color = 'black', width = 1.5) {
+        function drawLine(ctx, m, val1, val2, radius, center, color = LINE_COLOR, width = 1.5) {
             const angle1 = (Math.PI * 2 * val1) / m - Math.PI / 2;
             const x1 = center + radius * Math.cos(angle1);
             const y1 = center + radius * Math.sin(angle1);
@@ -175,24 +544,24 @@
         function drawButtonIcon() {
             const canvas = document.getElementById('btnCanvas');
             const ctx = canvas.getContext('2d');
-            const m = 10; // Use mod 10 for the icon as it looks nice
+            const m = 10;
             const seq = getPisanoSequence(0, 1, m);
-            const r = 22; // small radius
-            const c = 25; // center
+            const r = 19;
+            const c = 22;
 
-            ctx.clearRect(0,0,50,50);
+            ctx.clearRect(0, 0, 44, 44);
 
-            // Draw lines in yellow
-            for(let i = 0; i < seq.length; i++) {
+            // Draw lines in icon color
+            for (let i = 0; i < seq.length; i++) {
                 const startVal = seq[i];
                 const endVal = seq[(i + 1) % seq.length];
-                drawLine(ctx, m, startVal, endVal, r, c, '#fde047', 1);
+                drawLine(ctx, m, startVal, endVal, r, c, ICON_COLOR, 1);
             }
 
             // Circle border
             ctx.beginPath();
             ctx.arc(c, c, r, 0, Math.PI * 2);
-            ctx.strokeStyle = '#fde047';
+            ctx.strokeStyle = ICON_COLOR;
             ctx.lineWidth = 1;
             ctx.stroke();
         }
@@ -211,7 +580,7 @@
             const moduli = parseRange(modString);
 
             if (moduli.length === 0) {
-                grid.innerHTML = '<p class="text-xl font-bold">Please enter valid modular systems.</p>';
+                grid.innerHTML = '<p class="error-msg">Please enter valid modular systems.</p>';
                 return;
             }
 
@@ -220,17 +589,16 @@
                 const seq = getPisanoSequence(start1, start2, m);
 
                 const card = document.createElement('div');
-                card.className = 'flex flex-col items-center';
+                card.className = 'canvas-card';
 
                 const title = document.createElement('h3');
-                title.className = 'text-2xl font-bold mb-2';
+                title.className = 'canvas-card-title';
                 title.innerText = m;
                 card.appendChild(title);
 
                 const canvas = document.createElement('canvas');
                 canvas.width = CANVAS_SIZE;
                 canvas.height = CANVAS_SIZE;
-                canvas.className = 'bg-transparent';
                 card.appendChild(canvas);
 
                 grid.appendChild(card);
@@ -241,8 +609,8 @@
                     ctx: canvas.getContext('2d'),
                     canvas: canvas,
                     currentIndex: 0,
-                    lastDrawTime: 0, // for timing
-                    startTime: null  // will set when animation starts
+                    lastDrawTime: 0,
+                    startTime: null
                 };
             });
 
@@ -252,12 +620,12 @@
                 ctx.beginPath();
                 ctx.arc(CENTER, CENTER, RADIUS, 0, Math.PI * 2);
                 ctx.lineWidth = 2;
-                ctx.strokeStyle = '#000';
+                ctx.strokeStyle = CIRCLE_COLOR;
                 ctx.stroke();
             });
 
             // Animation Loop - Time Based (3 seconds duration)
-            const TARGET_DURATION = 3000; // 3 seconds
+            const TARGET_DURATION = 3000;
 
             function animate(timestamp) {
                 let active = false;
@@ -267,20 +635,12 @@
 
                     if (sys.startTime === null) sys.startTime = timestamp;
 
-                    // Calculate how many lines should be drawn by now based on time
                     const elapsed = timestamp - sys.startTime;
-                    const progress = Math.min(elapsed / TARGET_DURATION, 1); // 0 to 1
-
-                    // The target index is the number of lines that should be visible
+                    const progress = Math.min(elapsed / TARGET_DURATION, 1);
                     const targetIndex = Math.floor(progress * seq.length);
 
-                    // Draw lines until we catch up to targetIndex
                     if (sys.currentIndex < targetIndex && sys.currentIndex < seq.length) {
                         active = true;
-
-                        // We loop here to "catch up" if the frame rate dropped or if logic requires multiple lines per frame
-                        // But since we want it smooth, the browser loop usually handles it.
-                        // If seq is HUGE, this ensures it finishes in 3s even if it needs to draw 100 lines per frame.
                         while (sys.currentIndex < targetIndex && sys.currentIndex < seq.length) {
                             const startVal = seq[sys.currentIndex];
                             const endVal = seq[(sys.currentIndex + 1) % seq.length];
@@ -288,7 +648,6 @@
                             sys.currentIndex++;
                         }
                     } else if (sys.currentIndex < seq.length) {
-                        // Keep animation active if we haven't finished, even if we are waiting for the next time slot
                         active = true;
                     }
                 });
@@ -306,7 +665,6 @@
             drawButtonIcon();
             initVisualization();
         };
-
     </script>
 </body>
 </html>

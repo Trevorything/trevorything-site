@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>How Many Moons Preview</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>How Many Moons Preview — Trevorything.ai</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body, html {
-            margin: 0;
-            padding: 0;
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #111827; /* Match landing page tab background color */
+            background-color: #0a2e2e;
+            font-family: 'Inter', sans-serif;
         }
         canvas {
             display: block;
@@ -21,28 +23,42 @@
         }
         #info {
             position: absolute;
-            bottom: 10px;
-            left: 10px;
-            color: rgba(255, 255, 255, 0.75);
-            font-family: sans-serif;
+            bottom: 14px;
+            left: 14px;
+            color: rgba(194, 237, 237, 0.8);
             font-size: 11px;
             font-weight: 500;
             pointer-events: none;
-            background: rgba(3, 7, 18, 0.65);
-            backdrop-filter: blur(4px);
-            padding: 4px 8px;
-            border-radius: 6px;
-            border: 1px border rgba(255, 255, 255, 0.05);
+            background: rgba(4, 28, 28, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            letter-spacing: 0.01em;
+        }
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            background-color: #8fd8d8;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #5ec2c2;
+            animation: pulse 2s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 12px #3d9e9e; }
+            100% { transform: scale(0.9); opacity: 0.6; }
         }
     </style>
 </head>
 <body>
     <canvas id="previewCanvas"></canvas>
     <div id="info">
-        <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse"></span>
+        <span class="pulse-dot"></span>
         <span id="labelText">Calculating moons...</span>
     </div>
 
@@ -70,7 +86,6 @@
 
         function getPhaseLabel(phaseVal) {
             const isWaxing = phaseVal < 0.5;
-            // Map phase 0.0-1.0 into 8 buckets matching mapping rules
             const illumination = (1 - Math.cos(2 * Math.PI * phaseVal)) / 2;
             
             if (illumination <= 0.05) return moonNames[0]; // New Moon
@@ -94,14 +109,14 @@
             const cx = w / 2;
             const cy = h / 2;
 
-            // Clear with canvas container background matching landing tabs
-            context.fillStyle = '#111827'; 
+            // Clear with deep teal background
+            context.fillStyle = '#0a2e2e'; 
             context.fillRect(0, 0, w, h);
 
-            // Draw cosmic space glow
+            // Draw cosmic space glow - beautiful teal glow instead of indigo
             const glow = context.createRadialGradient(cx, cy, r * 0.9, cx, cy, Math.min(w, h) / 2);
-            glow.addColorStop(0, 'rgba(129, 140, 248, 0.15)'); // glowing indigo
-            glow.addColorStop(0.5, 'rgba(99, 102, 241, 0.03)');
+            glow.addColorStop(0, 'rgba(61, 158, 158, 0.22)'); // glowing mid-light teal
+            glow.addColorStop(0.5, 'rgba(26, 92, 92, 0.05)');
             glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
             context.fillStyle = glow;
             context.beginPath();
@@ -111,14 +126,14 @@
             // Draw dark base
             context.beginPath();
             context.arc(cx, cy, r, 0, 2 * Math.PI);
-            context.fillStyle = '#1f2937'; // slate-800
+            context.fillStyle = '#041c1c'; // darkest teal
             context.fill();
 
             // Subtle background craters indicator
             context.save();
             context.clip();
-            context.fillStyle = '#111827';
-            context.globalAlpha = 0.3;
+            context.fillStyle = '#0a2e2e';
+            context.globalAlpha = 0.25;
             context.beginPath(); context.arc(cx - r*0.35, cy - r*0.25, r*0.14, 0, 2*Math.PI); context.fill();
             context.beginPath(); context.arc(cx + r*0.2, cy + r*0.4, r*0.22, 0, 2*Math.PI); context.fill();
             context.restore();
@@ -131,9 +146,9 @@
 
             // Illumination gradient
             const moonGrad = context.createLinearGradient(cx - r, cy, cx + r, cy);
-            moonGrad.addColorStop(0, '#f8fafc'); 
-            moonGrad.addColorStop(0.5, '#e2e8f0'); 
-            moonGrad.addColorStop(1, '#cbd5e1'); 
+            moonGrad.addColorStop(0, '#f0fafa'); // --white
+            moonGrad.addColorStop(0.5, '#c2eded'); // --lightest
+            moonGrad.addColorStop(1, '#8fd8d8'); // --lighter
 
             context.fillStyle = moonGrad;
             context.globalAlpha = 1.0;
@@ -162,8 +177,8 @@
             }
 
             // Beautiful craters overlay
-            context.fillStyle = '#64748b';
-            context.globalAlpha = 0.15;
+            context.fillStyle = '#267a7a'; // --mid teal
+            context.globalAlpha = 0.2;
             context.beginPath(); context.arc(cx - r*0.35, cy - r*0.25, r*0.14, 0, 2*Math.PI); context.fill();
             context.beginPath(); context.arc(cx + r*0.2, cy + r*0.4, r*0.22, 0, 2*Math.PI); context.fill();
             context.restore();
@@ -172,7 +187,7 @@
             const sphereGrad = context.createRadialGradient(cx - r*0.15, cy - r*0.15, r*0.1, cx, cy, r);
             sphereGrad.addColorStop(0, 'rgba(255, 255, 255, 0.08)');
             sphereGrad.addColorStop(0.8, 'rgba(0, 0, 0, 0)');
-            sphereGrad.addColorStop(1, 'rgba(0, 0, 0, 0.45)');
+            sphereGrad.addColorStop(1, 'rgba(4, 28, 28, 0.55)');
             context.fillStyle = sphereGrad;
             context.beginPath();
             context.arc(cx, cy, r, 0, 2 * Math.PI);
@@ -181,7 +196,7 @@
             // Neon glowing ring border
             context.beginPath();
             context.arc(cx, cy, r, 0, 2 * Math.PI);
-            context.strokeStyle = 'rgba(165, 180, 252, 0.18)'; // thin glowing indigo border
+            context.strokeStyle = 'rgba(143, 216, 216, 0.25)'; // glowing light teal border
             context.lineWidth = 1.5;
             context.stroke();
         }
@@ -189,7 +204,6 @@
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            // Draw immediately on resize
             drawPreviewMoon(ctx, phase);
         }
         window.addEventListener('resize', resize);
@@ -207,7 +221,7 @@
             // Update label
             const currentItem = getPhaseLabel(phase);
             const illuminationPercent = Math.round((1 - Math.cos(2 * Math.PI * phase)) / 2 * 100);
-            labelText.textContent = `Moon Phase: ${currentItem.emoji} ${currentItem.name} (${illuminationPercent}%)`;
+            labelText.textContent = `Moons: ${currentItem.emoji} ${currentItem.name} (${illuminationPercent}%)`;
 
             // Draw moon
             drawPreviewMoon(ctx, phase);
@@ -216,7 +230,6 @@
         }
 
         requestAnimationFrame(animate);
-
     </script>
 </body>
 </html>
