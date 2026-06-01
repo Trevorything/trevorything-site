@@ -118,7 +118,7 @@
         <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 pb-1 mb-4 md:mb-0 md:mr-4">
             Trevorything.ai
         </h1>
-        <nav class="flex space-x-4">
+        <nav class="flex flex-wrap gap-2 justify-center">
              <a href="Sum Sequence Path/index.html" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out shadow hover:shadow-md">
                  Pisano Paths
              </a>
@@ -128,14 +128,17 @@
              <a href="Pisano Webs/index.html" class="bg-[#FEFF00] hover:bg-yellow-300 text-black font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out shadow hover:shadow-md">
                  Yatsko's Webs
              </a>
+             <a href="howmanymoons/index.html" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out shadow hover:shadow-md">
+                 How Many Moons
+             </a>
         </nav>
     </header>
 
-    <main class="flex-grow relative w-full h-[80vh] overflow-hidden flex flex-col justify-center items-center">
+    <main class="flex-grow relative w-full h-[100vh] overflow-hidden flex flex-col justify-center items-center">
 
         <!-- Tab 1: Pisano Paths (Left) -->
         <div class="preview-tab" id="tab1" onclick="window.location.href='Sum Sequence Path/index.html'"
-             style="top: 5%; left: -5%; width: 60%; height: 35%; background-color: #1f2937; transform: skewX(-10deg);">
+             style="top: 2%; left: -5%; width: 60%; height: 23%; background-color: #1f2937; transform: skewX(-10deg);">
             <div style="transform: skewX(10deg); width: 100%; height: 100%; position: relative;">
                 <iframe src="Sum Sequence Path/preview.html" class="preview-frame" scrolling="no"></iframe>
                 <div class="tab-overlay">
@@ -147,7 +150,7 @@
 
         <!-- Tab 2: Modulo Matrix (Right) -->
         <div class="preview-tab" id="tab2" onclick="window.location.href='Sum Sequence Matrix/index.html'"
-             style="top: 35%; right: -5%; width: 60%; height: 35%; background-color: #374151; transform: skewX(10deg);">
+             style="top: 26%; right: -5%; width: 60%; height: 23%; background-color: #374151; transform: skewX(10deg);">
             <div style="transform: skewX(-10deg); width: 100%; height: 100%; position: relative;">
                  <iframe src="Sum Sequence Matrix/preview.html" class="preview-frame" scrolling="no"></iframe>
                  <div class="tab-overlay">
@@ -159,12 +162,24 @@
 
         <!-- Tab 3: Yatsko's Webs (Left) -->
         <div class="preview-tab" id="tab3" onclick="window.location.href='Pisano Webs/index.html'"
-             style="top: 65%; left: -5%; width: 60%; height: 35%; background-color: #4b5563; transform: skewX(-10deg);">
+             style="top: 50%; left: -5%; width: 60%; height: 23%; background-color: #4b5563; transform: skewX(-10deg);">
             <div style="transform: skewX(10deg); width: 100%; height: 100%; position: relative;">
                 <iframe src="Pisano Webs/preview.html" class="preview-frame" scrolling="no"></iframe>
                 <div class="tab-overlay">
                     <h2 class="tab-title">Yatsko's Webs</h2>
                     <p class="tab-desc">Beautiful circular visualizations of Pisano periods.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 4: How Many Moons (Right) -->
+        <div class="preview-tab" id="tab4" onclick="window.location.href='howmanymoons/index.html'"
+             style="top: 74%; right: -5%; width: 60%; height: 23%; background-color: #1e1b4b; transform: skewX(10deg);">
+            <div style="transform: skewX(-10deg); width: 100%; height: 100%; position: relative;">
+                 <iframe src="howmanymoons/preview.html" class="preview-frame" scrolling="no"></iframe>
+                 <div class="tab-overlay">
+                    <h2 class="tab-title">How Many Moons</h2>
+                    <p class="tab-desc">Count the lunar cycles and trace moon phase histories.</p>
                 </div>
             </div>
         </div>

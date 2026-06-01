@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Many Moons Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #111827; /* Match landing page tab background color */
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        #info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: rgba(255, 255, 255, 0.75);
+            font-family: sans-serif;
+            font-size: 11px;
+            font-weight: 500;
+            pointer-events: none;
+            background: rgba(3, 7, 18, 0.65);
+            backdrop-filter: blur(4px);
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px border rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="previewCanvas"></canvas>
+    <div id="info">
+        <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse"></span>
+        <span id="labelText">Calculating moons...</span>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('previewCanvas');
+        const ctx = canvas.getContext('2d');
+        const labelText = document.getElementById('labelText');
+
+        // Animation state variables
+        let phase = 0.0;
+        let lastTime = 0;
+        const cycleSpeed = 0.05; // Amount of phase change per second (20 seconds for full cycle)
+
+        // Simple lookup strings for visualization
+        const moonNames = [
+            { name: "New Moon", emoji: "🌑" },
+            { name: "Waxing Crescent", emoji: "🌒" },
+            { name: "First Quarter", emoji: "🌓" },
+            { name: "Waxing Gibbous", emoji: "🌔" },
+            { name: "Full Moon", emoji: "🌕" },
+            { name: "Waning Gibbous", emoji: "🌖" },
+            { name: "Last Quarter", emoji: "🌗" },
+            { name: "Waning Crescent", emoji: "🌘" }
+        ];
+
+        function getPhaseLabel(phaseVal) {
+            const isWaxing = phaseVal < 0.5;
+            // Map phase 0.0-1.0 into 8 buckets matching mapping rules
+            const illumination = (1 - Math.cos(2 * Math.PI * phaseVal)) / 2;
+            
+            if (illumination <= 0.05) return moonNames[0]; // New Moon
+            if (isWaxing) {
+                if (illumination <= 0.24) return moonNames[1];
+                if (illumination <= 0.49) return moonNames[2];
+                if (illumination <= 0.74) return moonNames[3];
+                return moonNames[4]; // Full Moon
+            } else {
+                if (illumination >= 0.75) return moonNames[5];
+                if (illumination >= 0.50) return moonNames[6];
+                if (illumination >= 0.06) return moonNames[7];
+                return moonNames[0]; // New Moon fallback
+            }
+        }
+
+        function drawPreviewMoon(context, phaseVal) {
+            const w = context.canvas.width;
+            const h = context.canvas.height;
+            const r = Math.min(w, h) / 2 * 0.55;
+            const cx = w / 2;
+            const cy = h / 2;
+
+            // Clear with canvas container background matching landing tabs
+            context.fillStyle = '#111827'; 
+            context.fillRect(0, 0, w, h);
+
+            // Draw cosmic space glow
+            const glow = context.createRadialGradient(cx, cy, r * 0.9, cx, cy, Math.min(w, h) / 2);
+            glow.addColorStop(0, 'rgba(129, 140, 248, 0.15)'); // glowing indigo
+            glow.addColorStop(0.5, 'rgba(99, 102, 241, 0.03)');
+            glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            context.fillStyle = glow;
+            context.beginPath();
+            context.arc(cx, cy, Math.min(w, h) / 2, 0, 2 * Math.PI);
+            context.fill();
+
+            // Draw dark base
+            context.beginPath();
+            context.arc(cx, cy, r, 0, 2 * Math.PI);
+            context.fillStyle = '#1f2937'; // slate-800
+            context.fill();
+
+            // Subtle background craters indicator
+            context.save();
+            context.clip();
+            context.fillStyle = '#111827';
+            context.globalAlpha = 0.3;
+            context.beginPath(); context.arc(cx - r*0.35, cy - r*0.25, r*0.14, 0, 2*Math.PI); context.fill();
+            context.beginPath(); context.arc(cx + r*0.2, cy + r*0.4, r*0.22, 0, 2*Math.PI); context.fill();
+            context.restore();
+
+            // Draw illuminated side overlay
+            context.save();
+            context.beginPath();
+            context.arc(cx, cy, r, 0, 2 * Math.PI);
+            context.clip();
+
+            // Illumination gradient
+            const moonGrad = context.createLinearGradient(cx - r, cy, cx + r, cy);
+            moonGrad.addColorStop(0, '#f8fafc'); 
+            moonGrad.addColorStop(0.5, '#e2e8f0'); 
+            moonGrad.addColorStop(1, '#cbd5e1'); 
+
+            context.fillStyle = moonGrad;
+            context.globalAlpha = 1.0;
+
+            const isWaxing = phaseVal < 0.5;
+            const rx = Math.cos(phaseVal * 2 * Math.PI) * r;
+
+            // Draw terminator path
+            context.beginPath();
+            if (phaseVal === 0 || phaseVal === 1) {
+                // New Moon
+            } else if (phaseVal === 0.5) {
+                // Full Moon
+                context.arc(cx, cy, r, 0, 2 * Math.PI);
+                context.fill();
+            } else if (isWaxing) {
+                // Waxing: Right illuminated
+                context.arc(cx, cy, r, -Math.PI/2, Math.PI/2, false);
+                context.ellipse(cx, cy, Math.abs(rx), r, 0, Math.PI/2, -Math.PI/2, rx < 0);
+                context.fill();
+            } else {
+                // Waning: Left illuminated
+                context.arc(cx, cy, r, Math.PI/2, -Math.PI/2, false);
+                context.ellipse(cx, cy, Math.abs(rx), r, 0, -Math.PI/2, Math.PI/2, rx > 0);
+                context.fill();
+            }
+
+            // Beautiful craters overlay
+            context.fillStyle = '#64748b';
+            context.globalAlpha = 0.15;
+            context.beginPath(); context.arc(cx - r*0.35, cy - r*0.25, r*0.14, 0, 2*Math.PI); context.fill();
+            context.beginPath(); context.arc(cx + r*0.2, cy + r*0.4, r*0.22, 0, 2*Math.PI); context.fill();
+            context.restore();
+
+            // Sphere shading overlay
+            const sphereGrad = context.createRadialGradient(cx - r*0.15, cy - r*0.15, r*0.1, cx, cy, r);
+            sphereGrad.addColorStop(0, 'rgba(255, 255, 255, 0.08)');
+            sphereGrad.addColorStop(0.8, 'rgba(0, 0, 0, 0)');
+            sphereGrad.addColorStop(1, 'rgba(0, 0, 0, 0.45)');
+            context.fillStyle = sphereGrad;
+            context.beginPath();
+            context.arc(cx, cy, r, 0, 2 * Math.PI);
+            context.fill();
+
+            // Neon glowing ring border
+            context.beginPath();
+            context.arc(cx, cy, r, 0, 2 * Math.PI);
+            context.strokeStyle = 'rgba(165, 180, 252, 0.18)'; // thin glowing indigo border
+            context.lineWidth = 1.5;
+            context.stroke();
+        }
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            // Draw immediately on resize
+            drawPreviewMoon(ctx, phase);
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function animate(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const elapsed = (timestamp - lastTime) / 1000;
+            lastTime = timestamp;
+
+            // Increment phase
+            phase += elapsed * cycleSpeed;
+            if (phase >= 1.0) phase -= 1.0;
+
+            // Update label
+            const currentItem = getPhaseLabel(phase);
+            const illuminationPercent = Math.round((1 - Math.cos(2 * Math.PI * phase)) / 2 * 100);
+            labelText.textContent = `Moon Phase: ${currentItem.emoji} ${currentItem.name} (${illuminationPercent}%)`;
+
+            // Draw moon
+            drawPreviewMoon(ctx, phase);
+
+            requestAnimationFrame(animate);
+        }
+
+        requestAnimationFrame(animate);
+
+    </script>
+</body>
+</html>

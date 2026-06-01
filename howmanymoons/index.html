@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Many Moons - Trevorything.ai</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030712; /* Extreme dark gray-950 */
+            color: #f3f4f6; /* text-gray-100 */
+        }
+        .heading-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .mono-font {
+            font-family: 'Fira Code', monospace;
+        }
+        .gradient-text {
+            background-image: linear-gradient(to right, #818cf8, #c084fc, #f472b6); /* indigo-400, purple-400, pink-400 */
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        /* Custom styled date picker */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
+        /* Glassmorphism scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(31, 41, 55, 0.3);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.3);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.6);
+        }
+        /* Interactive emoji hover effect */
+        .moon-emoji-span {
+            display: inline-block;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), text-shadow 0.2s;
+            padding: 2px 1px;
+            border-radius: 4px;
+        }
+        .moon-emoji-span:hover {
+            transform: scale(1.4) translateY(-2px);
+            background: rgba(99, 102, 241, 0.2); /* indigo-500/20 */
+            text-shadow: 0 0 8px rgba(165, 180, 252, 0.8);
+        }
+        .moon-emoji-span.hovered-active {
+            transform: scale(1.4) translateY(-2px);
+            background: rgba(192, 132, 252, 0.3); /* purple-400/30 */
+            text-shadow: 0 0 12px rgba(192, 132, 252, 0.9);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative overflow-x-hidden">
+
+    <!-- Blurred NASA APOD Background Image Container -->
+    <div id="bgImage" class="fixed inset-0 w-full h-full bg-cover bg-center transition-all duration-1000 z-0 select-none pointer-events-none opacity-20 filter blur-[10px]" 
+         style="background-image: url('https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=2070&auto=format&fit=crop');">
+    </div>
+    <!-- Dark Vignette Overlay -->
+    <div class="fixed inset-0 w-full h-full bg-gradient-to-t from-gray-950 via-gray-950/85 to-gray-900/60 z-0 select-none pointer-events-none"></div>
+
+    <!-- Header Navigation -->
+    <header class="py-4 px-4 md:px-8 bg-gray-900/50 backdrop-blur-md border-b border-gray-800 shadow-lg mb-8 w-full flex flex-col md:flex-row justify-between items-center z-50 relative">
+        <h1 class="text-4xl md:text-5xl font-bold font-sans tracking-tight pb-1 mb-4 md:mb-0 md:mr-4">
+            <a href="../index.html" class="gradient-text font-black transition-all hover:opacity-90">Trevorything.ai</a>
+        </h1>
+        <nav class="flex flex-wrap gap-2 justify-center">
+             <a href="../Sum Sequence Path/index.html" class="bg-gray-800/65 hover:bg-purple-700/80 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out shadow hover:shadow-md border border-gray-700/50">
+                 Pisano Paths
+             </a>
+             <a href="../Sum Sequence Matrix/index.html" class="bg-gray-800/65 hover:bg-pink-700/80 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out shadow hover:shadow-md border border-gray-700/50">
+                 Modulo Matrix
+             </a>
+             <a href="../Pisano Webs/index.html" class="bg-[#FEFF00] hover:bg-yellow-300 text-black font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out shadow hover:shadow-md">
+                 Yatsko's Webs
+             </a>
+             <a href="index.html" class="bg-indigo-600/90 text-white font-semibold py-2 px-4 rounded-lg shadow-lg border border-indigo-500/50 cursor-default">
+                 How Many Moons
+             </a>
+        </nav>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container mx-auto px-4 py-4 flex-grow z-10 relative max-w-7xl">
+        
+        <!-- Header Text -->
+        <div class="text-center mb-8">
+            <h2 class="text-4xl md:text-5xl font-bold font-['Space_Grotesk'] tracking-tight text-white mb-2">
+                How many moons have passed since...
+            </h2>
+            <p class="text-gray-400 max-w-xl mx-auto text-sm md:text-base">
+                Discover the exact phases of the moon that connected your moments, and share the cosmic sequence with your friends.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-16">
+            
+            <!-- Left Side: Controls & Results Display (7 Columns) -->
+            <div class="lg:col-span-7 space-y-6">
+                
+                <!-- Controls Card -->
+                <div class="bg-gray-900/60 backdrop-blur-md p-6 rounded-2xl border border-gray-800/80 shadow-2xl">
+                    <h3 class="text-lg font-semibold text-gray-200 mb-4 flex items-center">
+                        <span class="mr-2">📅</span> Select Date Interval
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 items-start">
+                        <!-- Since Input -->
+                        <div>
+                            <label for="startDate" class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Since Date</label>
+                            <input type="date" id="startDate" class="w-full px-4 py-3 bg-gray-800/70 border border-gray-700 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-sm">
+                        </div>
+                        
+                        <!-- Until Input & Checkbox -->
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <label for="untilToday" class="block text-xs font-semibold uppercase tracking-wider text-gray-400">Until Date</label>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="untilToday" checked class="sr-only peer">
+                                    <span class="mr-2 text-xs text-indigo-400 peer-checked:text-indigo-300 font-medium">Until Today</span>
+                                    <div class="relative w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                                </label>
+                            </div>
+                            
+                            <!-- Hidden date input - will expand/collapse -->
+                            <div id="untilDateContainer" class="hidden transition-all duration-300">
+                                <input type="date" id="endDate" class="w-full px-4 py-3 bg-gray-800/70 border border-gray-700 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-sm">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 text-center">
+                        <p id="errorAlert" class="text-red-400 text-xs font-medium h-4"></p>
+                    </div>
+                </div>
+
+                <!-- Results Card -->
+                <div class="bg-gray-900/60 backdrop-blur-md p-6 rounded-2xl border border-gray-800/80 shadow-2xl flex flex-col min-h-[350px]">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-200 flex items-center">
+                            <span class="mr-2">🌙</span> Lunar Sequence
+                        </h3>
+                        <div class="text-xs text-gray-400 font-medium cursor-help" title="Hover over emojis to explore specific dates on the right!">
+                            💡 Hover emojis to explore dates
+                        </div>
+                    </div>
+                    
+                    <!-- Emoji String Output -->
+                    <div class="flex-grow bg-gray-950/70 border border-gray-800/90 rounded-xl p-4 md:p-6 mb-4 flex flex-col justify-center shadow-inner">
+                        <code id="emojiContainer" class="mono-font block text-2xl md:text-3xl leading-relaxed text-center tracking-widest break-words overflow-y-auto max-h-48 select-all p-2 bg-transparent select-text">
+                            <!-- Emojis populated here -->
+                        </code>
+                        <div id="noDataMessage" class="hidden text-center text-gray-500 py-12">
+                            Select a valid date range to trace your moons.
+                        </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <button id="btnCopy" class="flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-white font-semibold py-3 px-4 rounded-xl transition duration-150 border border-gray-700 hover:shadow-lg focus:outline-none">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                            Copy Emojis Only
+                        </button>
+                        <button id="btnShare" class="flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl transition duration-150 border border-indigo-500/50 hover:shadow-lg focus:outline-none">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 10.742l4.636-2.318m0 5.152l-4.636-2.318M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 4a3 3 0 11-6 0 3 3 0 016 0zm6-8a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            Share Full Story
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Dashboard Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-gray-900/60 backdrop-blur-md p-4 rounded-xl border border-gray-800/80 text-center shadow-lg">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Total Days</p>
+                        <p id="statDays" class="text-2xl font-black heading-font text-white">0</p>
+                    </div>
+                    <div class="bg-gray-900/60 backdrop-blur-md p-4 rounded-xl border border-gray-800/80 text-center shadow-lg">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Lunar Cycles</p>
+                        <p id="statLunations" class="text-2xl font-black heading-font text-indigo-400">0.0</p>
+                    </div>
+                    <div class="bg-gray-900/60 backdrop-blur-md p-4 rounded-xl border border-gray-800/80 text-center shadow-lg">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Most Frequent Phase</p>
+                        <p id="statDominantPhase" class="text-2xl font-black heading-font text-pink-400">🌑</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Grand Moon Centerpiece & Playback (5 Columns) -->
+            <div class="lg:col-span-5 space-y-6">
+                
+                <!-- Moon centerpiece container -->
+                <div class="bg-gray-900/60 backdrop-blur-md p-6 rounded-2xl border border-gray-800/80 shadow-2xl flex flex-col items-center relative overflow-hidden">
+                    
+                    <!-- Title of the selected day -->
+                    <div class="text-center mb-4 z-10 w-full">
+                        <p class="text-xs font-bold uppercase tracking-widest text-indigo-400 mb-1">Lunar Inspector</p>
+                        <h4 id="inspectorDate" class="text-xl font-bold font-['Space_Grotesk'] text-white">May 31, 2026</h4>
+                        <p id="inspectorState" class="text-xs text-gray-400 font-medium">Waxing Gibbous • 85% Illumination</p>
+                    </div>
+
+                    <!-- Glowing Moon Canvas -->
+                    <div class="relative w-64 h-64 my-4 flex items-center justify-center z-10">
+                        <!-- Shadow ring -->
+                        <div class="absolute inset-4 rounded-full bg-indigo-500/5 filter blur-3xl mix-blend-screen animate-pulse pointer-events-none"></div>
+                        <canvas id="moonCanvas" width="500" height="500" class="w-full h-full relative cursor-crosshair transition-transform duration-300 hover:scale-[1.03]"></canvas>
+                    </div>
+
+                    <!-- Interactive animation play bar -->
+                    <div class="w-full bg-gray-950/50 p-4 rounded-xl border border-gray-800/90 z-10 space-y-3">
+                        <div class="flex items-center justify-between gap-4">
+                            <button id="btnPlay" class="bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg p-2.5 transition focus:outline-none flex items-center justify-center" title="Play Time-lapse">
+                                <svg id="playIcon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                                <svg id="pauseIcon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                            </button>
+                            
+                            <!-- Timeline slider -->
+                            <div class="flex-grow relative flex items-center">
+                                <input type="range" id="timelineSlider" min="0" max="1" value="0" class="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                            </div>
+                            
+                            <button id="btnReset" class="text-gray-400 hover:text-white transition p-2" title="Reset Timeline">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.5M4 8h5.053"></path></svg>
+                            </button>
+                        </div>
+                        
+                        <div class="flex justify-between items-center text-[10px] text-gray-500 font-semibold uppercase tracking-wider">
+                            <span id="timelineStart">Start</span>
+                            <span id="animationSpeedLabel">Speed: Normal</span>
+                            <span id="timelineEnd">End</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emoji breakdown card -->
+                <div class="bg-gray-900/60 backdrop-blur-md p-6 rounded-2xl border border-gray-800/80 shadow-2xl">
+                    <h4 class="text-sm font-bold uppercase tracking-wider text-gray-400 mb-3 flex items-center">
+                        <span class="mr-2">📊</span> Phase Frequency Breakdown
+                    </h4>
+                    <div id="breakdownGrid" class="grid grid-cols-4 gap-3 text-center">
+                        <!-- Breakdown counts will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- NASA APOD Credits Badge -->
+    <div id="apodBadge" class="fixed bottom-4 right-4 z-40 bg-gray-950/80 backdrop-blur-md border border-gray-800 px-3 py-1.5 rounded-lg text-[10px] font-semibold text-gray-400 shadow-md cursor-pointer hover:bg-gray-900/90 hover:text-white transition flex items-center gap-1.5">
+        <div class="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping pointer-events-none"></div>
+        <span>Background: Space Wallpaper</span>
+    </div>
+
+    <!-- NASA Details Glassmorphic Modal -->
+    <div id="apodModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900/90 backdrop-blur-md border border-gray-800 p-6 rounded-2xl max-w-lg w-full shadow-2xl relative">
+            <button id="modalClose" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div class="space-y-4">
+                <div class="flex items-center gap-2">
+                    <span class="bg-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full">NASA APOD</span>
+                    <span id="modalDate" class="text-xs text-gray-400 font-semibold">2026-05-31</span>
+                </div>
+                <h4 id="modalTitle" class="text-xl font-bold font-['Space_Grotesk'] text-white pr-6">Cosmic Vista</h4>
+                <div class="max-h-60 overflow-y-auto text-sm text-gray-300 leading-relaxed pr-2">
+                    <p id="modalExplanation">NASA Astronomy Picture of the Day Details.</p>
+                </div>
+                <div id="modalCopyrightContainer" class="text-xs text-gray-500 font-medium">
+                    Copyright: <span id="modalCopyright">NASA</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Copy/Share Success Toast -->
+    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 bg-indigo-600 text-white font-semibold text-xs tracking-wider uppercase px-4 py-2.5 rounded-full shadow-xl border border-indigo-400/30 opacity-0 transition-opacity duration-300 pointer-events-none">
+        Copied successfully!
+    </div>
+
+    <!-- Page Footer -->
+    <footer class="py-6 px-4 text-center text-gray-400 border-t border-gray-900/60 bg-gray-950/80 z-20 relative">
+        <p class="text-xs font-semibold">&copy; <span id="currentYear"></span> Trevorything.ai. All rights reserved.</p>
+    </footer>
+
+    <!-- Logic Script -->
+    <script>
+        // --- Core Configurations & Constants ---
+        const SYNODIC_PERIOD = 29.530588853; // Length of a lunar cycle in days
+        const KNOWN_NEW_MOON_JD = 2451550.1; // Base reference New Moon: Jan 6, 2000 14:24 UTC
+
+        // Beautiful lunar photograph backups
+        const FALLBACK_MOONS = [
+            {
+                url: 'https://images.unsplash.com/photo-1538370965046-79c0d6907d47?q=80&w=2070&auto=format&fit=crop',
+                title: 'Stellar Nursery and Cosmic Dust',
+                date: 'Unsplash Space',
+                explanation: 'A breathtaking widefield capture of deep space dust lanes, distant nebulae, and stellar constellations. Handpicked as a high-fidelity landing background.',
+                copyright: 'Unsplash Astronomy'
+            },
+            {
+                url: 'https://images.unsplash.com/photo-1522030299830-16b8d3d049fe?q=80&w=1973&auto=format&fit=crop',
+                title: 'Waxing Gibbous Over Dark Horizon',
+                date: 'NASA Science Studio',
+                explanation: 'A high-contrast exposure of the Moon showing sharp craters along the lunar terminator. The dark maria and bright highlands stand out beautifully.',
+                copyright: 'NASA SVS'
+            },
+            {
+                url: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=2070&auto=format&fit=crop',
+                title: 'Total Lunar Eclipse / Blood Moon',
+                date: 'NASA Science Studio',
+                explanation: 'During a total lunar eclipse, the Earth blocks direct sunlight from reaching the moon. The only light reflected from the lunar surface is refracted by Earth\'s atmosphere, giving it a copper-red glow.',
+                copyright: 'NASA SVS'
+            }
+        ];
+
+        // --- DOM Elements ---
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        const untilTodayCheckbox = document.getElementById('untilToday');
+        const untilDateContainer = document.getElementById('untilDateContainer');
+        const errorAlert = document.getElementById('errorAlert');
+        const emojiContainer = document.getElementById('emojiContainer');
+        const noDataMessage = document.getElementById('noDataMessage');
+
+        const statDays = document.getElementById('statDays');
+        const statLunations = document.getElementById('statLunations');
+        const statDominantPhase = document.getElementById('statDominantPhase');
+        const breakdownGrid = document.getElementById('breakdownGrid');
+
+        const inspectorDate = document.getElementById('inspectorDate');
+        const inspectorState = document.getElementById('inspectorState');
+        const moonCanvas = document.getElementById('moonCanvas');
+
+        const btnPlay = document.getElementById('btnPlay');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const btnReset = document.getElementById('btnReset');
+        const timelineSlider = document.getElementById('timelineSlider');
+        const timelineStart = document.getElementById('timelineStart');
+        const timelineEnd = document.getElementById('timelineEnd');
+        const animationSpeedLabel = document.getElementById('animationSpeedLabel');
+
+        const btnCopy = document.getElementById('btnCopy');
+        const btnShare = document.getElementById('btnShare');
+        const toast = document.getElementById('toast');
+
+        const bgImage = document.getElementById('bgImage');
+        const apodBadge = document.getElementById('apodBadge');
+        const apodModal = document.getElementById('apodModal');
+        const modalClose = document.getElementById('modalClose');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalDate = document.getElementById('modalDate');
+        const modalExplanation = document.getElementById('modalExplanation');
+        const modalCopyright = document.getElementById('modalCopyright');
+        const modalCopyrightContainer = document.getElementById('modalCopyrightContainer');
+
+        // --- App State ---
+        let currentIntervalDates = []; // List of Date objects in the current sequence
+        let currentIntervalPhases = []; // Phase/Illumination computations for each date
+        let timelineIndex = 0; // Currently selected index on the timeline
+        let isPlaying = false; // State of play loop
+        let playIntervalId = null; // Animation loop reference
+        let activeBackgroundInfo = FALLBACK_MOONS[0]; // Stores background credits
+
+        // --- Core Logic: Astronomy Calculations ---
+
+        /**
+         * Calculates the Julian Date (JD) for a given JS Date object.
+         */
+        function getJulianDate(date) {
+            const time = date.getTime();
+            // Convert milliseconds to Julian Date (formula based on standard epoch)
+            // Julian Epoch: Jan 1, 4713 BC. Milliseconds since Jan 1, 1970
+            return (time / 86400000) + 2440587.5;
+        }
+
+        /**
+         * Compute high-precision astronomical moon phase cycle location and illumination.
+         * returns { phase: 0.0-1.0, illumination: 0.0-1.0, isWaxing: boolean }
+         */
+        function getMoonPhaseDetails(date) {
+            const jd = getJulianDate(date);
+            const daysSinceBase = jd - KNOWN_NEW_MOON_JD;
+            
+            // Decimal cycles since base new moon
+            const cycles = daysSinceBase / SYNODIC_PERIOD;
+            let phase = cycles - Math.floor(cycles);
+            if (phase < 0) phase += 1.0;
+
+            // Illumination percentage
+            const illumination = (1 - Math.cos(2 * Math.PI * phase)) / 2;
+            const isWaxing = (phase < 0.5);
+
+            return {
+                phase: phase,
+                illumination: illumination,
+                isWaxing: isWaxing
+            };
+        }
+
+        /**
+         * Map astronomical phase values to standard moon phase strings and emojis.
+         */
+        function mapPhaseToUI(phase, illumination, isWaxing) {
+            if (illumination <= 0.05) {
+                return { emoji: '🌑', name: 'New Moon' };
+            }
+            if (isWaxing) {
+                if (illumination <= 0.24) return { emoji: '🌒', name: 'Waxing Crescent' };
+                if (illumination <= 0.49) return { emoji: '🌓', name: 'First Quarter' };
+                if (illumination <= 0.74) return { emoji: '🌔', name: 'Waxing Gibbous' };
+                return { emoji: '🌕', name: 'Full Moon' };
+            } else {
+                if (illumination >= 0.75) return { emoji: '🌖', name: 'Waning Gibbous' };
+                if (illumination >= 0.50) return { emoji: '🌗', name: 'Last Quarter' };
+                if (illumination >= 0.06) return { emoji: '🌘', name: 'Waning Crescent' };
+                return { emoji: '🌑', name: 'New Moon' };
+            }
+        }
+
+        // --- Render Helpers ---
+
+        /**
+         * Dynamically draws a 3D-shaded vector representation of the moon phase on a 2D Canvas.
+         */
+        function drawMoonCanvas(phase, illumination) {
+            const ctx = moonCanvas.getContext('2d');
+            const w = moonCanvas.width;
+            const h = moonCanvas.height;
+            const r = (w / 2) * 0.82;
+            const cx = w / 2;
+            const cy = h / 2;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // 1. Draw cosmic space glow
+            const glow = ctx.createRadialGradient(cx, cy, r * 0.9, cx, cy, w / 2);
+            glow.addColorStop(0, 'rgba(129, 140, 248, 0.25)'); // glowing indigo
+            glow.addColorStop(0.4, 'rgba(99, 102, 241, 0.08)');
+            glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = glow;
+            ctx.beginPath();
+            ctx.arc(cx, cy, w / 2, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 2. Draw dark base (unilluminated side)
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+            ctx.fillStyle = '#111827'; // slate-900 / dark space background
+            ctx.fill();
+
+            // Subtle dark-side craters texture
+            ctx.save();
+            ctx.clip();
+            ctx.fillStyle = '#030712';
+            ctx.globalAlpha = 0.4;
+            // Draw standard visual crater indicators
+            ctx.beginPath(); ctx.arc(cx - r*0.35, cy - r*0.25, r*0.14, 0, 2*Math.PI); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx + r*0.2, cy + r*0.4, r*0.22, 0, 2*Math.PI); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx - r*0.08, cy + r*0.5, r*0.09, 0, 2*Math.PI); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx + r*0.45, cy - r*0.3, r*0.11, 0, 2*Math.PI); ctx.fill();
+            ctx.restore();
+
+            // 3. Draw illuminated side overlay
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+            ctx.clip();
+
+            // Lunar surface illumination gradients (silver-white-gold)
+            const moonGrad = ctx.createLinearGradient(cx - r, cy, cx + r, cy);
+            moonGrad.addColorStop(0, '#f8fafc'); // slate-50
+            moonGrad.addColorStop(0.5, '#e2e8f0'); // slate-200
+            moonGrad.addColorStop(1, '#cbd5e1'); // slate-300
+
+            ctx.fillStyle = moonGrad;
+            ctx.globalAlpha = 1.0;
+
+            const isWaxing = phase < 0.5;
+            const rx = Math.cos(phase * 2 * Math.PI) * r; // Width of terminator ellipse
+
+            // Draw terminator paths
+            ctx.beginPath();
+            if (phase === 0 || phase === 1) {
+                // New Moon: fully shaded
+            } else if (phase === 0.5) {
+                // Full Moon: fully illuminated
+                ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+                ctx.fill();
+            } else if (isWaxing) {
+                // Waxing: Right side is illuminated
+                ctx.arc(cx, cy, r, -Math.PI/2, Math.PI/2, false);
+                // Terminator curve back from bottom to top
+                // rx < 0 curves left (waxing gibbous), rx > 0 curves right (waxing crescent)
+                ctx.ellipse(cx, cy, Math.abs(rx), r, 0, Math.PI/2, -Math.PI/2, rx < 0);
+                ctx.fill();
+            } else {
+                // Waning: Left side is illuminated
+                ctx.arc(cx, cy, r, Math.PI/2, -Math.PI/2, false);
+                // Terminator curve back from top to bottom
+                // rx > 0 curves right (waning crescent), rx < 0 curves left (waning gibbous)
+                ctx.ellipse(cx, cy, Math.abs(rx), r, 0, -Math.PI/2, Math.PI/2, rx > 0);
+                ctx.fill();
+            }
+
+            // Beautiful craters overlay on the illuminated surface
+            ctx.fillStyle = '#475569'; // slate-600
+            ctx.globalAlpha = 0.18;
+            ctx.beginPath(); ctx.arc(cx - r*0.35, cy - r*0.25, r*0.14, 0, 2*Math.PI); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx + r*0.2, cy + r*0.4, r*0.22, 0, 2*Math.PI); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx - r*0.08, cy + r*0.5, r*0.09, 0, 2*Math.PI); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx + r*0.45, cy - r*0.3, r*0.11, 0, 2*Math.PI); ctx.fill();
+
+            ctx.restore();
+
+            // 4. Overlay radial shading for a gorgeous spherical 3D look
+            const sphereGrad = ctx.createRadialGradient(cx - r*0.15, cy - r*0.15, r*0.1, cx, cy, r);
+            sphereGrad.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
+            sphereGrad.addColorStop(0.75, 'rgba(0, 0, 0, 0)');
+            sphereGrad.addColorStop(1, 'rgba(0, 0, 0, 0.55)');
+            ctx.fillStyle = sphereGrad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 5. Draw a clean glowing neon border around the moon sphere
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+            ctx.strokeStyle = 'rgba(165, 180, 252, 0.25)'; // indigo border
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+        }
+
+        /**
+         * Update Inspector components on the right panel to show details for a specific day.
+         */
+        function updateInspector(index) {
+            if (index < 0 || index >= currentIntervalDates.length) return;
+            
+            timelineIndex = index;
+            timelineSlider.value = index;
+
+            const date = currentIntervalDates[index];
+            const data = currentIntervalPhases[index];
+            const uiDetails = mapPhaseToUI(data.phase, data.illumination, data.isWaxing);
+
+            // Format date nicely
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            inspectorDate.textContent = date.toLocaleDateString('en-US', options);
+            inspectorState.textContent = `${uiDetails.name} • ${Math.round(data.illumination * 100)}% Illumination`;
+
+            // Draw moon
+            drawMoonCanvas(data.phase, data.illumination);
+
+            // Sync visual highlights in the emoji box
+            const spans = emojiContainer.querySelectorAll('.moon-emoji-span');
+            spans.forEach((span, i) => {
+                if (i === index) {
+                    span.classList.add('hovered-active');
+                    // Scroll container if needed to bring highlighted emoji into view
+                    if (isPlaying) {
+                        span.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                    }
+                } else {
+                    span.classList.remove('hovered-active');
+                }
+            });
+        }
+
+        // --- Core Calculator & Workflow Engine ---
+
+        /**
+         * Processes the user date input and triggers the full calculation workflow.
+         */
+        function calculateMoons() {
+            errorAlert.textContent = ''; // Reset alert
+
+            const startVal = startDateInput.value;
+            const endVal = untilTodayCheckbox.checked ? new Date().toISOString().split('T')[0] : endDateInput.value;
+
+            if (!startVal || !endVal) {
+                displayNoData();
+                return;
+            }
+
+            const startDate = new Date(startVal + 'T12:00:00'); // Centralize timezone bias
+            const endDate = new Date(endVal + 'T12:00:00');
+
+            if (endDate < startDate) {
+                errorAlert.textContent = 'Until Date must be equal to or after Since Date.';
+                displayNoData();
+                return;
+            }
+
+            // Generate full date list
+            currentIntervalDates = [];
+            currentIntervalPhases = [];
+            
+            let tempDate = new Date(startDate);
+            // Cap list size to 3652 days (~10 years) to protect CPU memory
+            const maxDaysLimit = 3652;
+            let daysCounted = 0;
+
+            while (tempDate <= endDate && daysCounted < maxDaysLimit) {
+                currentIntervalDates.push(new Date(tempDate));
+                
+                // Perform astronomical computation
+                const phaseDetails = getMoonPhaseDetails(tempDate);
+                currentIntervalPhases.push(phaseDetails);
+
+                tempDate.setDate(tempDate.getDate() + 1);
+                daysCounted++;
+            }
+
+            if (currentIntervalDates.length === 0) {
+                displayNoData();
+                return;
+            }
+
+            // Show results UI components
+            noDataMessage.classList.add('hidden');
+            emojiContainer.classList.remove('hidden');
+
+            // Render Emojis inside interactive hover spans
+            emojiContainer.innerHTML = '';
+            const emojiCounts = {};
+
+            currentIntervalDates.forEach((date, i) => {
+                const data = currentIntervalPhases[i];
+                const ui = mapPhaseToUI(data.phase, data.illumination, data.isWaxing);
+
+                // Increment counts for breakdown
+                emojiCounts[ui.emoji] = (emojiCounts[ui.emoji] || 0) + 1;
+
+                const span = document.createElement('span');
+                span.className = 'moon-emoji-span';
+                span.textContent = ui.emoji;
+                span.dataset.index = i;
+                span.title = `${date.toISOString().split('T')[0]} : ${ui.name}`;
+                
+                // Mouse interactive triggers
+                span.addEventListener('mouseenter', () => {
+                    if (!isPlaying) updateInspector(i);
+                });
+                
+                emojiContainer.appendChild(span);
+            });
+
+            // Update dashboards & breakdowns
+            statDays.textContent = currentIntervalDates.length;
+            
+            const totalLunations = (currentIntervalDates.length / SYNODIC_PERIOD).toFixed(2);
+            statLunations.textContent = totalLunations;
+
+            // Find dominant emoji
+            let dominantEmoji = '🌑';
+            let maxCount = 0;
+            const standardMoons = ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'];
+            
+            // Clean breakdown grid UI
+            breakdownGrid.innerHTML = '';
+            
+            standardMoons.forEach(emoji => {
+                const count = emojiCounts[emoji] || 0;
+                if (count > maxCount) {
+                    maxCount = count;
+                    dominantEmoji = emoji;
+                }
+
+                // Add card item to frequency breakdown
+                const gridItem = document.createElement('div');
+                gridItem.className = 'bg-gray-950/40 p-2.5 rounded-lg border border-gray-800/80';
+                gridItem.innerHTML = `
+                    <p class="text-xl mb-1">${emoji}</p>
+                    <p class="text-xs font-semibold text-gray-400">${count}</p>
+                `;
+                breakdownGrid.appendChild(gridItem);
+            });
+
+            statDominantPhase.textContent = dominantEmoji;
+
+            // Update Timeline slider range parameters
+            timelineSlider.min = 0;
+            timelineSlider.max = currentIntervalDates.length - 1;
+            timelineSlider.value = 0;
+
+            const formatOptions = { month: 'short', day: 'numeric', year: '2-digit' };
+            timelineStart.textContent = startDate.toLocaleDateString('en-US', formatOptions);
+            timelineEnd.textContent = endDate.toLocaleDateString('en-US', formatOptions);
+
+            // Display standard first items details in Inspector
+            updateInspector(0);
+
+            // Load NASA APOD for the start date dynamically!
+            loadNASAAPODBackground(startVal);
+        }
+
+        function displayNoData() {
+            noDataMessage.classList.remove('hidden');
+            emojiContainer.classList.add('hidden');
+            emojiContainer.innerHTML = '';
+            statDays.textContent = '0';
+            statLunations.textContent = '0.0';
+            statDominantPhase.textContent = '🌑';
+            breakdownGrid.innerHTML = '';
+            timelineSlider.max = 0;
+            timelineSlider.value = 0;
+        }
+
+        // --- Dynamic NASA APOD Fetcher & Cacher ---
+
+        /**
+         * Core dynamic background loader. Employs caching and multi-tier fallbacks.
+         */
+        async function loadNASAAPODBackground(dateString) {
+            const cachedData = localStorage.getItem(`apod_${dateString}`);
+            
+            if (cachedData) {
+                const apod = JSON.parse(cachedData);
+                applyBackground(apod);
+                return;
+            }
+
+            // Attempt live fetch
+            try {
+                // Standard DEMO_KEY with rate thresholds
+                const res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${dateString}`);
+                
+                if (!res.ok) {
+                    throw new Error(`API returned status ${res.status}`);
+                }
+
+                const data = await res.json();
+                
+                // We only use image content types (APOD occasionally returns youtube/vimeo media)
+                if (data.media_type === 'image' && data.hdurl) {
+                    const apodItem = {
+                        url: data.hdurl || data.url,
+                        title: data.title,
+                        date: data.date,
+                        explanation: data.explanation,
+                        copyright: data.copyright || 'NASA Public Domain'
+                    };
+                    localStorage.setItem(`apod_${dateString}`, JSON.stringify(apodItem));
+                    applyBackground(apodItem);
+                } else {
+                    throw new Error('APOD for this date is not a static image');
+                }
+            } catch (err) {
+                console.warn(`NASA APOD Fetch error for date ${dateString}. Launching fallback.`, err);
+                
+                // Pick a pseudo-random beautiful lunar APOD date or Unsplash background
+                const hashIndex = Math.abs(dateString.split('-').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % FALLBACK_MOONS.length;
+                const fallbackItem = FALLBACK_MOONS[hashIndex];
+                applyBackground(fallbackItem);
+            }
+        }
+
+        /**
+         * Renders the fetched metadata into background layers and interactive credits modal.
+         */
+        function applyBackground(apodObject) {
+            activeBackgroundInfo = apodObject;
+            
+            // Update page background with smooth transition
+            bgImage.style.backgroundImage = `url('${apodObject.url}')`;
+            
+            // Set credits trigger label
+            apodBadge.querySelector('span').textContent = `Background: ${apodObject.title}`;
+
+            // Sync modal texts
+            modalTitle.textContent = apodObject.title;
+            modalDate.textContent = apodObject.date;
+            modalExplanation.textContent = apodObject.explanation;
+            
+            if (apodObject.copyright) {
+                modalCopyright.textContent = apodObject.copyright;
+                modalCopyrightContainer.classList.remove('hidden');
+            } else {
+                modalCopyrightContainer.classList.add('hidden');
+            }
+        }
+
+        // --- Time-Lapse Playback & Timeline Controls ---
+
+        /**
+         * Starts the time-lapse animation loop cycling day by day.
+         */
+        function startPlayLoop() {
+            isPlaying = true;
+            playIcon.classList.add('hidden');
+            pauseIcon.classList.remove('hidden');
+
+            const speedMs = 120; // Perfect duration for dynamic visual flow
+
+            playIntervalId = setInterval(() => {
+                let nextIdx = timelineIndex + 1;
+                if (nextIdx >= currentIntervalDates.length) {
+                    nextIdx = 0; // Wrap back to starting date
+                }
+                updateInspector(nextIdx);
+            }, speedMs);
+        }
+
+        /**
+         * Pauses the animation.
+         */
+        function stopPlayLoop() {
+            isPlaying = false;
+            playIcon.classList.remove('hidden');
+            pauseIcon.classList.add('hidden');
+            if (playIntervalId) {
+                clearInterval(playIntervalId);
+                playIntervalId = null;
+            }
+        }
+
+        // --- Toast Alerts Helper ---
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 2500);
+        }
+
+        // --- Clipboard & Sharing Triggers ---
+
+        function copyEmojisToClipboard() {
+            const rawEmojis = Array.from(emojiContainer.querySelectorAll('.moon-emoji-span'))
+                                   .map(span => span.textContent)
+                                   .join('');
+            
+            if (!rawEmojis) return;
+
+            navigator.clipboard.writeText(rawEmojis)
+                .then(() => showToast('Moon emojis copied to clipboard!'))
+                .catch(() => showToast('Failed to copy. Please highlight and copy manually.'));
+        }
+
+        function triggerShare() {
+            if (currentIntervalDates.length === 0) return;
+
+            const startDateStr = startDateInput.value;
+            const endDateStr = untilTodayCheckbox.checked ? new Date().toISOString().split('T')[0] : endDateInput.value;
+            
+            const rawEmojis = Array.from(emojiContainer.querySelectorAll('.moon-emoji-span'))
+                                   .map(span => span.textContent)
+                                   .join('');
+
+            const totalDaysVal = currentIntervalDates.length;
+            const cycleVal = statLunations.textContent;
+
+            // Pre-format a gorgeous message
+            const shareText = `How many moons have passed since ${startDateStr} until ${endDateStr}? 🌌\n\nTotal Days: ${totalDaysVal} days\nLunar Cycles: ${cycleVal} cycles\n\n${rawEmojis}\n\nTrace your cosmic journey at https://trevorything.ai/howmanymoons/ 🌙`;
+
+            // Try utilizing native sharing APIs on mobile
+            if (navigator.share) {
+                navigator.share({
+                    title: 'How Many Moons? - Trevorything.ai',
+                    text: shareText,
+                    url: 'https://trevorything.ai/howmanymoons/'
+                })
+                .then(() => console.log('Shared successfully.'))
+                .catch((err) => {
+                    // Failures occur if the user aborts/cancels native dialogue. Fallback.
+                    console.log('Share canceled or failed. Copying fallback to clipboard.', err);
+                    navigator.clipboard.writeText(shareText)
+                        .then(() => showToast('Full story copied to clipboard for sharing!'));
+                });
+            } else {
+                // Fallback direct copy
+                navigator.clipboard.writeText(shareText)
+                    .then(() => showToast('Full story copied to clipboard for sharing!'));
+            }
+        }
+
+        // --- Event Listeners Setup ---
+
+        // Input Changes
+        startDateInput.addEventListener('change', calculateMoons);
+        endDateInput.addEventListener('change', calculateMoons);
+        
+        untilTodayCheckbox.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                untilDateContainer.classList.add('hidden');
+                calculateMoons();
+            } else {
+                untilDateContainer.classList.remove('hidden');
+                // Default until date to today
+                if (!endDateInput.value) {
+                    endDateInput.value = new Date().toISOString().split('T')[0];
+                }
+                calculateMoons();
+            }
+        });
+
+        // Timeline Slider interactions
+        timelineSlider.addEventListener('input', (e) => {
+            stopPlayLoop(); // Pause animation while manually dragging
+            updateInspector(parseInt(e.target.value));
+        });
+
+        // Play/Pause Action
+        btnPlay.addEventListener('click', () => {
+            if (isPlaying) {
+                stopPlayLoop();
+            } else {
+                startPlayLoop();
+            }
+        });
+
+        // Reset Timeline
+        btnReset.addEventListener('click', () => {
+            stopPlayLoop();
+            updateInspector(0);
+        });
+
+        // Interactive Credits Badge Trigger
+        apodBadge.addEventListener('click', () => {
+            apodModal.classList.remove('hidden');
+        });
+
+        modalClose.addEventListener('click', () => {
+            apodModal.classList.add('hidden');
+        });
+
+        apodModal.addEventListener('click', (e) => {
+            if (e.target === apodModal) apodModal.classList.add('hidden');
+        });
+
+        // Clipboard Copy
+        btnCopy.addEventListener('click', copyEmojisToClipboard);
+        btnShare.addEventListener('click', triggerShare);
+
+        // --- Initialization ---
+        window.addEventListener('load', () => {
+            // Update Year in Footer
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+            // Set default date range: exactly 1 month ago (30 days) to today
+            const today = new Date();
+            const oneMonthAgo = new Date();
+            oneMonthAgo.setDate(today.getDate() - 30);
+
+            startDateInput.value = oneMonthAgo.toISOString().split('T')[0];
+            endDateInput.value = today.toISOString().split('T')[0];
+
+            // Render calculations
+            calculateMoons();
+        });
+    </script>
+</body>
+</html>
