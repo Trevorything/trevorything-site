@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Euro Cousin Trip 2026 - Itinerary & Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="glow-bg"></div>
+  <div class="glow-bg-secondary"></div>
+
+  <div class="app-container">
+    <header class="app-header">
+      <div class="logo-area">
+        <span class="badge">Sept 29 - Oct 10, 2026</span>
+        <h1>Euro Cousin Trip <span>2026</span></h1>
+        <p>4 Cousins • 3 Countries • 11 Nights • Cost-Effective Luxury</p>
+      </div>
+    </header>
+
+    <nav class="app-nav">
+      <button class="nav-btn active" onclick="switchTab('itinerary')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+        Itinerary Timeline
+      </button>
+      <button class="nav-btn" onclick="switchTab('cities')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+        City Recommendations
+      </button>
+      <button class="nav-btn" onclick="switchTab('budget')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        Budget Estimator
+      </button>
+      <button class="nav-btn" onclick="switchTab('transit')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8m-5 5h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293h3.172a1 1 0 00.707-.293l2.414-2.414a1 1 0 01.707-.293H20" /></svg>
+        Transit & Excursions
+      </button>
+    </nav>
+
+    <main class="app-main">
+      
+      <!-- ITINERARY TAB -->
+      <section id="tab-itinerary" class="tab-content active">
+        <div class="itinerary-layout">
+          <div class="day-sidebar glass">
+            <h3>Select Day</h3>
+            <div class="day-list" id="day-list-buttons">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <div class="day-detail-panel">
+            <div class="day-card glass" id="day-details-card">
+              <div class="day-header">
+                <span class="day-badge" id="current-day-label">Day 1 (Sept 29)</span>
+                <h2 id="current-day-title">Prague Arrival & Bohemian Welcome</h2>
+              </div>
+              
+              <div class="timeline" id="current-day-events">
+                <!-- Dynamically populated -->
+              </div>
+
+              <div class="alternatives-box">
+                <h4>✨ Alternative Choices & Free Time Boosts</h4>
+                <ul id="current-day-alternatives">
+                  <!-- Dynamically populated -->
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CITIES TAB -->
+      <section id="tab-cities" class="tab-content">
+        <div class="city-selector">
+          <button class="city-pill active" onclick="filterCity('prague')">Prague</button>
+          <button class="city-pill" onclick="filterCity('dresden')">Dresden</button>
+          <button class="city-pill" onclick="filterCity('munich')">Munich (Oktoberfest)</button>
+          <button class="city-pill" onclick="filterCity('salzburg')">Salzburg</button>
+          <button class="city-pill" onclick="filterCity('vienna')">Vienna (Kelton's Base)</button>
+        </div>
+
+        <div class="city-recommendations-grid">
+          
+          <div class="grid-column">
+            <div class="section-title">
+              <h3>🏨 Lodging Options</h3>
+            </div>
+            <div id="city-lodging" class="cards-list"></div>
+          </div>
+
+          <div class="grid-column">
+            <div class="section-title">
+              <h3>🎟️ Sights & Nightlife</h3>
+            </div>
+            <div id="city-attractions" class="cards-list"></div>
+          </div>
+
+          <div class="grid-column">
+            <div class="section-title">
+              <h3>🍽️ Local Bites & Dining</h3>
+            </div>
+            <div id="city-food" class="cards-list"></div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- BUDGET TAB -->
+      <section id="tab-budget" class="tab-content">
+        <div class="budget-layout">
+          <div class="budget-panel glass">
+            <h2>Interactive Cost Calculator</h2>
+            <p class="subtitle">Customize the estimates to match your specific plans. Keep it under <strong>$3,000 per person</strong>!</p>
+            
+            <div class="input-group">
+              <label for="calc-flight">✈️ Flight Cost ($ / person)</label>
+              <input type="number" id="calc-flight" value="950" oninput="updateBudgetCalculator()">
+              <span class="hint">Includes transatlantic flight from US.</span>
+            </div>
+
+            <div class="input-group">
+              <label for="calc-lodging">🏨 Total Lodging Cost ($ / person)</label>
+              <input type="number" id="calc-lodging" value="450" oninput="updateBudgetCalculator()">
+              <span class="hint">Includes Prague, Dresden, Munich (S-Bahn Dachau), & Salzburg. Vienna is €0!</span>
+            </div>
+
+            <div class="input-group">
+              <label for="calc-food">🍔 Food & Drink Budget ($ / person)</label>
+              <input type="number" id="calc-food" value="700" oninput="updateBudgetCalculator()">
+              <span class="hint">Recommended: ~$65/day for 11 days (local beer is very cheap in CZ/DE/AT).</span>
+            </div>
+
+            <div class="input-group">
+              <label for="calc-activities">🎟️ Activities & Excursions ($ / person)</label>
+              <input type="number" id="calc-activities" value="300" oninput="updateBudgetCalculator()">
+              <span class="hint">Includes Beer Spa, Neuschwanstein, Eisriesenwelt caves, & club entries.</span>
+            </div>
+
+            <div class="input-group">
+              <label for="calc-transport">🚆 Train Tickets & Transit Passes ($ / person)</label>
+              <input type="number" id="calc-transport" value="200" oninput="updateBudgetCalculator()">
+              <span class="hint">Includes EC/ICE trains, Bayern-Ticket, and local tram cards.</span>
+            </div>
+          </div>
+
+          <div class="budget-summary glass">
+            <h3>Calculated Trip Total</h3>
+            
+            <div class="large-price">
+              <span class="price-label">Per Person Cost</span>
+              <span class="price-val" id="total-per-person">$2,600.00</span>
+            </div>
+
+            <div class="group-price">
+              <span>Total for Group (4 People)</span>
+              <strong id="total-group">$10,400.00</strong>
+            </div>
+
+            <div id="budget-status" class="status-tag success">Under Budget! 🎉 Ready to live it up!</div>
+
+            <div class="smart-tips">
+              <h4>💡 Clever Cost-Saving Choices Made:</h4>
+              <ul>
+                <li><strong>Vienna lodging is free:</strong> Staying at Cousin Kelton Koch's apartment saves the group approx. $1,000 total.</li>
+                <li><strong>Munich S-Bahn Strategy:</strong> Staying in Dachau during Oktoberfest closing weekend saves €300+ per night.</li>
+                <li><strong>Bavarian Rail Pass:</strong> Using the DB Bayern-Ticket for Munich-Salzburg and Neuschwanstein Castle excursions costs only €15/person for full days of travel.</li>
+                <li><strong>Bratislava day-trip alternative:</strong> Bratislava is a super-cheap alternative for food and drinks, only 1 hour from Vienna.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TRANSIT TAB -->
+      <section id="tab-transit" class="tab-content">
+        <div class="transit-container glass">
+          <h2>Transit & Excursion Matrix</h2>
+          <p class="subtitle">Complete schedule breakdown, booking tips, and map guides.</p>
+
+          <table class="transit-table">
+            <thead>
+              <tr>
+                <th>Segment</th>
+                <th>Method</th>
+                <th>Duration</th>
+                <th>Estimated Cost (Group of 4)</th>
+                <th>Notes / Best Practice</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Prague Airport ➔ Accommodation</strong></td>
+                <td>Uber / Airport Express Bus</td>
+                <td>30 - 45 mins</td>
+                <td>~€16 - €20 total</td>
+                <td>Split an Uber/Bolt for convenience, or take the AE Bus for €4 PP.</td>
+              </tr>
+              <tr>
+                <td><strong>Prague ➔ Dresden</strong></td>
+                <td>EuroCity (EC) Train</td>
+                <td>2h 15m</td>
+                <td>~€60 - €80 total</td>
+                <td>Direct frequent train. Buy tickets early on České Dráhy (cd.cz) or bahn.com.</td>
+              </tr>
+              <tr>
+                <td><strong>Dresden ➔ Munich</strong></td>
+                <td>ICE High-Speed Train</td>
+                <td>4h 30m</td>
+                <td>~€120 - €180 total</td>
+                <td>Connects via Leipzig or Erfurt. Book via Deutsche Bahn.</td>
+              </tr>
+              <tr>
+                <td><strong>Munich ➔ Neuschwanstein Castle</strong></td>
+                <td>Bavarian Regional Train + Bus</td>
+                <td>2h 30m (each way)</td>
+                <td>€59 total</td>
+                <td>Buy a <strong>Bayern-Ticket</strong> for 4 people at a ticket machine. Covers all regional trains & buses!</td>
+              </tr>
+              <tr>
+                <td><strong>Munich ➔ Salzburg</strong></td>
+                <td>BRB regional train</td>
+                <td>1h 45m</td>
+                <td>€59 total</td>
+                <td>Use the same <strong>Bayern-Ticket</strong> on the regional line. Direct train every hour.</td>
+              </tr>
+              <tr>
+                <td><strong>Salzburg ➔ Eisriesenwelt Werfen</strong></td>
+                <td>S-Bahn S3 + Shuttle Bus</td>
+                <td>1h 15m (each way)</td>
+                <td>~€40 total (Transit only)</td>
+                <td>Train from Salzburg Hbf to Werfen, shuttle bus to ticket office, hike, and cable car.</td>
+              </tr>
+              <tr>
+                <td><strong>Salzburg ➔ Vienna</strong></td>
+                <td>Railjet / Westbahn Train</td>
+                <td>2h 30m</td>
+                <td>~€80 - €120 total</td>
+                <td>Westbahn is often cheaper and offers nice double-decker trains.</td>
+              </tr>
+              <tr>
+                <td><strong>Vienna ➔ Vienna Airport (VIE)</strong></td>
+                <td>S-Bahn S7 Train</td>
+                <td>25 mins</td>
+                <td>€17.60 total</td>
+                <td>Fast regional train. Avoid the overpriced CAT (City Airport Train).</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="transit-tips-box">
+            <h3>⚠️ Critical Excursion Warnings</h3>
+            <div class="warning-grid">
+              <div class="warning-item">
+                <h5>🏰 Neuschwanstein Castle</h5>
+                <p>Tickets drop exactly 3 months in advance and sell out rapidly. Make sure to book online ahead of time. Don't skip Marienbrücke bridge for the absolute best view of the castle.</p>
+              </div>
+              <div class="warning-item">
+                <h5>❄️ Eisriesenwelt Ice Caves</h5>
+                <p>Warm clothes and sturdy shoes are mandatory! Even in early October, the cave interior is below freezing (32°F / 0°C). The tour requires walking up 1,400 stairs.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="app-footer">
+      <p>Built with ❤️ for Camille, Trevor, Kelton & Cousins. Cost-effectively living it up in Europe!</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Tab Switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      const targetBtn = Array.from(document.querySelectorAll('.nav-btn')).find(btn => btn.getAttribute('onclick').includes(tabId));
+      if (targetBtn) targetBtn.classList.add('active');
+      
+      const targetTab = document.getElementById(`tab-${tabId}`);
+      if (targetTab) targetTab.classList.add('active');
+    }
+
+    // Itinerary Loading & Interaction
+    let currentDayIndex = 0;
+    
+    function populateItineraryButtons() {
+      const btnContainer = document.getElementById('day-list-buttons');
+      btnContainer.innerHTML = '';
+      
+      tripData.itinerary.forEach((item, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `day-btn ${idx === currentDayIndex ? 'active' : ''}`;
+        btn.onclick = () => selectDay(idx);
+        
+        btn.innerHTML = `
+          <span class="day-num">${item.day.split(' ')[0]} ${item.day.split(' ')[1]}</span>
+          <span class="day-title">${item.title.substring(0, 24)}${item.title.length > 24 ? '...' : ''}</span>
+        `;
+        btnContainer.appendChild(btn);
+      });
+    }
+
+    function selectDay(idx) {
+      currentDayIndex = idx;
+      
+      // Update buttons
+      document.querySelectorAll('.day-btn').forEach((btn, bIdx) => {
+        if (bIdx === idx) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+      
+      const dayData = tripData.itinerary[idx];
+      document.getElementById('current-day-label').textContent = dayData.day;
+      document.getElementById('current-day-title').textContent = dayData.title;
+      
+      // Populate events
+      const eventsContainer = document.getElementById('current-day-events');
+      eventsContainer.innerHTML = '';
+      
+      dayData.events.forEach(ev => {
+        const item = document.createElement('div');
+        item.className = 'timeline-item';
+        item.innerHTML = `
+          <div class="time">${ev.time}</div>
+          <div class="content">
+            <h4>${ev.act}</h4>
+            <p>${ev.detail}</p>
+          </div>
+        `;
+        eventsContainer.appendChild(item);
+      });
+
+      // Populate alternatives
+      const altContainer = document.getElementById('current-day-alternatives');
+      altContainer.innerHTML = '';
+      dayData.alternatives.forEach(alt => {
+        const li = document.createElement('li');
+        li.textContent = alt;
+        altContainer.appendChild(li);
+      });
+    }
+
+    // Cities Loading & Interaction
+    let currentFilteredCity = 'prague';
+    
+    function filterCity(cityId) {
+      currentFilteredCity = cityId;
+      document.querySelectorAll('.city-pill').forEach(pill => {
+        if (pill.getAttribute('onclick').includes(cityId)) pill.classList.add('active');
+        else pill.classList.remove('active');
+      });
+
+      const city = tripData.cities[cityId];
+      
+      // Lodging
+      const lodgingContainer = document.getElementById('city-lodging');
+      lodgingContainer.innerHTML = '';
+      city.accommodation.forEach(acc => {
+        const card = document.createElement('div');
+        card.className = 'card glass';
+        card.innerHTML = `
+          <div class="card-header">
+            <h4>${acc.name}</h4>
+            <span class="type-tag">${acc.type}</span>
+          </div>
+          <p class="desc">${acc.desc}</p>
+          <div class="card-footer">
+            <span class="price">${acc.price}</span>
+            ${acc.link !== '#' ? `<a href="${acc.link}" target="_blank" class="card-btn">View Website ↗</a>` : ''}
+          </div>
+        `;
+        lodgingContainer.appendChild(card);
+      });
+
+      // Sights & Attractions
+      const attractionsContainer = document.getElementById('city-attractions');
+      attractionsContainer.innerHTML = '';
+      city.attractions.forEach(att => {
+        const card = document.createElement('div');
+        card.className = 'card glass';
+        card.innerHTML = `
+          <div class="card-header">
+            <h4>${att.name}</h4>
+            <span class="type-tag">${att.type}</span>
+          </div>
+          <p class="desc">${att.desc}</p>
+          <div class="card-footer">
+            <span class="price">${att.cost}</span>
+            <div class="btn-row">
+              <a href="${att.map}" target="_blank" class="card-btn secondary">Google Maps 📍</a>
+              <a href="${att.link}" target="_blank" class="card-btn">Info/Tickets ↗</a>
+            </div>
+          </div>
+        `;
+        attractionsContainer.appendChild(card);
+      });
+
+      // Food
+      const foodContainer = document.getElementById('city-food');
+      foodContainer.innerHTML = '';
+      city.food.forEach(fd => {
+        const card = document.createElement('div');
+        card.className = 'card glass';
+        card.innerHTML = `
+          <div class="card-header">
+            <h4>${fd.name}</h4>
+            <span class="type-tag">${fd.priceRange || 'Moderate'}</span>
+          </div>
+          <p class="specialty"><strong>Specialty:</strong> ${fd.specialty}</p>
+          <p class="desc">${fd.desc}</p>
+          <div class="card-footer">
+            <a href="${fd.map}" target="_blank" class="card-btn secondary">Google Maps 📍</a>
+          </div>
+        `;
+        foodContainer.appendChild(card);
+      });
+    }
+
+    // App Initialization
+    window.addEventListener('DOMContentLoaded', () => {
+      populateItineraryButtons();
+      selectDay(0);
+      filterCity('prague');
+      updateBudgetCalculator();
+    });
+  </script>
+</body>
+</html>
